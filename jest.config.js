@@ -5,7 +5,9 @@ module.exports = {
     '<rootDir>/src/setupTests.js'
   ],
   moduleNameMapper: {
-    // Add any other mappings as needed
+    // Add explicit mapping for react-router-dom
+    '^react-router-dom$': '<rootDir>/__mocks__/react-router-dom.js',
+    // Keep any other mappings you need
   },
   transform: {
     '^.+\\.(js|jsx)$': 'babel-jest'
