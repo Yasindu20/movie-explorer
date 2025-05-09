@@ -28,6 +28,11 @@
     "lint": "eslint \"src/**/*.{js,jsx}\" --max-warnings=0 || true",
     "prepare": "husky install"
   },
+  "jest": {
+    "moduleNameMapper": {
+      "^react-router-dom$": "<rootDir>/__mocks__/react-router-dom.js"
+      }
+  },
   "eslintConfig": {
     "extends": [
       "react-app",

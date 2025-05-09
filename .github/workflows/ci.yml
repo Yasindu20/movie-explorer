@@ -20,14 +20,15 @@ jobs:
         cache: 'npm'
     
     - name: Install dependencies
-      # Use install instead of ci to ensure all dependencies are installed
-      run: npm install
-    
+      # Use a full install with legacy-peer-deps to ensure everything works
+      run: npm install --legacy-peer-deps
+      
     - name: Run linting
       run: npm run lint || echo "No linting configured"
     
-    - name: Run tests
-      run: npm test -- --passWithNoTests
+    - name: Run tests with verbosity for debugging
+      # Use --no-watchman to avoid watchman issues
+      run: npm test -- --passWithNoTests --no-watchman --verbose
     
     - name: Build
       run: npm run build
