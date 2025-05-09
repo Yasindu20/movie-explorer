@@ -33,7 +33,6 @@ import {
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useMovieContext } from '../context/MovieContext';
-import SearchBar from './SearchBar';
 
 const Header = () => {
   const { user, logout } = useAuth();

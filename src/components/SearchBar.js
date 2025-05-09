@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Paper, InputBase, IconButton, Box } from '@mui/material';
+import { Paper, InputBase, IconButton } from '@mui/material';
 import { Search, Clear } from '@mui/icons-material';
 import { useMovieContext } from '../context/MovieContext';
 import { useNavigate, useLocation } from 'react-router-dom';

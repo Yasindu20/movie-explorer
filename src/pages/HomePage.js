@@ -8,7 +8,8 @@ import {
   Button, 
   Alert, 
   Paper, 
-  useTheme 
+  useTheme,
+  Chip
 } from '@mui/material';
 import MovieCard from '../components/MovieCard';
 import SearchBar from '../components/SearchBar';
@@ -27,6 +28,7 @@ const HomePage = () => {
   } = useMovieContext();
   const [genres, setGenres] = useState([]);
   const [loadingGenres, setLoadingGenres] = useState(false);
+  const [selectedGenre, setSelectedGenre] = useState(null);
 
   // Load trending movies on component mount
   useEffect(() => {
@@ -56,6 +58,22 @@ const HomePage = () => {
   const handleLoadMore = () => {
     loadTrendingMovies(page + 1);
   };
+
+  // Handle genre selection
+  const handleGenreClick = (genreId) => {
+    if (selectedGenre === genreId) {
+      setSelectedGenre(null); // Deselect if already selected
+    } else {
+      setSelectedGenre(genreId); // Select new genre
+    }
+  };
+
+  // Filter movies by selected genre
+  const filteredMovies = selectedGenre
+    ? trendingMovies.filter(movie => 
+        movie.genre_ids && movie.genre_ids.includes(selectedGenre)
+      )
+    : trendingMovies;
 
   return (
     <Container maxWidth="xl">
@@ -87,6 +105,47 @@ const HomePage = () => {
         </Box>
       </Paper>
 
+      {/* Genre Filters */}
+      <Box sx={{ mt: 4, mb: 3 }}>
+        <Typography 
+          variant="h6" 
+          gutterBottom 
+          sx={{ 
+            fontWeight: 'bold',
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          Filter by Genre
+          {selectedGenre && (
+            <Button 
+              size="small" 
+              onClick={() => setSelectedGenre(null)}
+              sx={{ ml: 2 }}
+            >
+              Clear Filter
+            </Button>
+          )}
+        </Typography>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+          {loadingGenres ? (
+            <CircularProgress size={24} />
+          ) : (
+            genres.map((genre) => (
+              <Chip
+                key={genre.id}
+                label={genre.name}
+                clickable
+                color="primary"
+                variant={selectedGenre === genre.id ? "filled" : "outlined"}
+                onClick={() => handleGenreClick(genre.id)}
+                sx={{ m: 0.5 }}
+              />
+            ))
+          )}
+        </Box>
+      </Box>
+
       {/* Trending Movies Section */}
       <Typography 
         variant="h4" 
@@ -101,7 +160,9 @@ const HomePage = () => {
           pb: 1
         }}
       >
-        Trending This Week
+        {selectedGenre 
+          ? `Trending ${genres.find(g => g.id === selectedGenre)?.name || ''} Movies` 
+          : 'Trending This Week'}
       </Typography>
 
       {error && (
@@ -116,15 +177,21 @@ const HomePage = () => {
         </Box>
       ) : (
         <>
-          <Grid container spacing={3}>
-            {trendingMovies.map((movie) => (
-              <Grid item key={movie.id} xs={12} sm={6} md={4} lg={3}>
-                <MovieCard movie={movie} />
-              </Grid>
-            ))}
-          </Grid>
+          {filteredMovies.length === 0 && selectedGenre ? (
+            <Alert severity="info" sx={{ mb: 3 }}>
+              No trending movies found in this genre. Try selecting a different genre.
+            </Alert>
+          ) : (
+            <Grid container spacing={3}>
+              {filteredMovies.map((movie) => (
+                <Grid item key={movie.id} xs={12} sm={6} md={4} lg={3}>
+                  <MovieCard movie={movie} />
+                </Grid>
+              ))}
+            </Grid>
+          )}
 
-          {page < totalPages && (
+          {!selectedGenre && page < totalPages && (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 4 }}>
               <Button 
                 variant="contained" 

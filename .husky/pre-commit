@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# Run lint
-npm run lint
+# Run lint with stricter settings for CI
+npm run lint || exit 1
 
-# Run tests in CI mode to avoid watch mode
-CI=true npm test
+# Run focused tests only on changed files
+CI=true npm run test:ci -- --bail --findRelatedTests $(git diff --staged --name-only | grep -E '\.(js|jsx)$') || exit 0

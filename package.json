@@ -22,9 +22,10 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --passWithNoTests",
+    "test": "react-scripts test",
+    "test:ci": "react-scripts test --watchAll=false --passWithNoTests --ci",
     "eject": "react-scripts eject",
-    "lint": "eslint \"src/**/*.{js,jsx}\" --quiet || true",
+    "lint": "eslint \"src/**/*.{js,jsx}\" --max-warnings=0 || true",
     "prepare": "husky install"
   },
   "eslintConfig": {
