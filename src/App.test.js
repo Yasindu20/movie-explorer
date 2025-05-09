@@ -1,8 +1,19 @@
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
+// Mock your components and context
+jest.mock('./context/MovieContext', () => ({
+  useMovieContext: () => ({ darkMode: false }),
+}));
+
+jest.mock('./context/AuthContext', () => ({
+  useAuth: () => ({ isAuthenticated: false }),
+}));
+
+jest.mock('./components/Header', () => () => <div data-testid="header-mock">Header</div>);
+jest.mock('./pages/LoginPage', () => () => <div data-testid="login-page-mock">Login Page</div>);
+
+test('renders without crashing', () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+  expect(screen.getByTestId('login-page-mock')).toBeInTheDocument();
 });
