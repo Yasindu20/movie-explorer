@@ -1,7 +1,20 @@
-// src/App.test.js
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import App from './App';
+
+// Mock modules before importing App
+jest.mock('react-router-dom', () => ({
+  BrowserRouter: ({ children }) => children,
+  Routes: ({ children }) => children,
+  Route: ({ element }) => element,
+  Navigate: jest.fn(() => null),
+  useNavigate: () => jest.fn(),
+  useLocation: () => ({ pathname: '/' }),
+  Link: ({ children }) => children,
+  useParams: () => ({ id: '123' }),
+}));
+
+// Import App after mocks are established
+const App = require('./App').default;
 
 // Mock the context providers
 jest.mock('./context/MovieContext', () => ({
