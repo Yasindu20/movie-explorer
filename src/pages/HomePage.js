@@ -87,8 +87,6 @@ const HomePage = () => {
   // Responsive breakpoints using useMediaQuery - Mobile First approach
   const isXsScreen = useMediaQuery(theme.breakpoints.only('xs'));
   const isSmScreen = useMediaQuery(theme.breakpoints.only('sm'));
-  const isMdScreen = useMediaQuery(theme.breakpoints.only('md'));
-  const isLgScreen = useMediaQuery(theme.breakpoints.up('lg'));
   const isTouchDevice = useMediaQuery('(hover: none)');
   
   const { 
