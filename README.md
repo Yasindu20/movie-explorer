@@ -1,70 +1,146 @@
-# Getting Started with Create React App
+# Movie Explorer App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A React application for discovering movies, viewing details, and saving favorites using the TMDb API.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- **User Authentication**: Simple login system with demo credentials
+- **Movie Discovery**: Browse trending movies from TMDb
+- **Search Functionality**: Search for movies by title
+- **Movie Details**: View comprehensive information about movies including:
+  - Overview, genres, rating, release date, runtime
+  - Cast information
+  - Trailers (via YouTube)
+  - Production companies
+- **Favorites Management**: Add/remove movies to a favorites list
+- **Dark/Light Mode**: Toggle between dark and light themes
+- **Responsive Design**: Mobile-first approach for all screen sizes
+- **Infinite Scrolling**: Load more results automatically as you scroll
+- **Error Handling**: User-friendly error messages
 
-### `npm start`
+## Setup and Installation
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Prerequisites
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- Node.js and npm installed
+- TMDb API key (get one at [https://www.themoviedb.org/settings/api](https://www.themoviedb.org/settings/api))
 
-### `npm test`
+### Installation Steps
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd movie-explorer
+   ```
 
-### `npm run build`
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+3. Create a `.env` file in the root directory and add your TMDb API key:
+   ```
+   REACT_APP_TMDB_API_KEY=your_api_key_here
+   ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+4. Update the API key in `src/api/tmdbApi.js` with your key.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+5. Start the development server:
+   ```bash
+   npm start
+   ```
 
-### `npm run eject`
+6. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Project Structure
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```
+movie-explorer/
+│
+├── public/
+│   ├── index.html
+│   └── ...
+│
+├── src/
+│   ├── api/
+│   │   └── tmdbApi.js        # API configuration and helper functions
+│   │
+│   ├── components/
+│   │   ├── Header.js         # App header with navigation
+│   │   ├── LoginForm.js      # User authentication form
+│   │   ├── MovieCard.js      # Card component for movie display
+│   │   └── SearchBar.js      # Search input component
+│   │
+│   ├── context/
+│   │   ├── AuthContext.js    # Authentication state management
+│   │   └── MovieContext.js   # Movie data state management
+│   │
+│   ├── pages/
+│   │   ├── FavoritesPage.js      # User's favorite movies
+│   │   ├── HomePage.js           # Trending movies display
+│   │   ├── LoginPage.js          # User login
+│   │   ├── MovieDetailsPage.js   # Detailed movie information
+│   │   └── SearchResultsPage.js  # Search results display
+│   │
+│   ├── App.js              # Main app component with routing
+│   ├── index.js            # Entry point
+│   └── index.css           # Global styles
+│
+├── .env                    # Environment variables (not in repo)
+├── package.json            # Project dependencies
+└── README.md               # Project documentation
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Technologies Used
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- **React**: Frontend library
+- **React Router**: Navigation and routing
+- **Context API**: State management
+- **Material-UI**: UI component library
+- **Axios**: HTTP client for API requests
+- **TMDb API**: Movie data source
+- **YouTube API**: For embedded trailers
+- **LocalStorage**: For saving user preferences and favorites
 
-## Learn More
+## Deployment
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+The app can be deployed using Vercel or Netlify:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Vercel Deployment
 
-### Code Splitting
+1. Push your code to a GitHub repository
+2. Visit [Vercel](https://vercel.com) and import your project
+3. Set the environment variables for your API key
+4. Deploy
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Netlify Deployment
 
-### Analyzing the Bundle Size
+1. Push your code to a GitHub repository
+2. Visit [Netlify](https://netlify.com) and import your project
+3. Set the environment variables for your API key
+4. Deploy
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Demo Credentials
 
-### Making a Progressive Web App
+For testing the application, use:
+- Username: `user`
+- Password: `password`
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## Future Enhancements
 
-### Advanced Configuration
+- User registration
+- Movie recommendations
+- Filter by genre, year, and rating
+- User reviews and ratings
+- Watch list functionality
+- Multi-language support
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## License
 
-### Deployment
+[MIT License](LICENSE)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## Acknowledgements
 
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- [TMDb API](https://developers.themoviedb.org/3) for movie data
+- [Material-UI](https://mui.com/) for the component library
+- [React Documentation](https://reactjs.org/docs)
