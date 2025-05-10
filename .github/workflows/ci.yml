@@ -22,13 +22,14 @@ jobs:
     - name: Install dependencies
       run: npm install --legacy-peer-deps
     
-    - name: Run linting with tolerance
+    - name: Run linting
       run: npm run lint -- --max-warnings=2
     
-    - name: Run tests with skip for problematic modules
+    - name: Run tests
       env:
-        NODE_ENV: test
-      run: npm test -- --passWithNoTests --testPathIgnorePatterns=node_modules
+        CI: true
+      # Use the simplest possible command
+      run: npm test -- --watchAll=false --passWithNoTests
     
     - name: Build
       run: npm run build
