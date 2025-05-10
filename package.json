@@ -29,9 +29,17 @@
     "prepare": "husky install"
   },
   "jest": {
-    "moduleNameMapper": {
-      "^react-router-dom$": "<rootDir>/__mocks__/react-router-dom.js"
-      }
+  "testEnvironment": "jsdom",
+  "transform": {
+    "^.+\\.(js|jsx)$": "babel-jest"
+  },
+  "transformIgnorePatterns": [
+    "/node_modules/(?!(axios)/)"
+  ],
+  "moduleNameMapper": {
+    "^axios$": "<rootDir>/__mocks__/axios.js",
+    "^react-router-dom$": "<rootDir>/__mocks__/react-router-dom.js"
+  }
   },
   "eslintConfig": {
     "extends": [

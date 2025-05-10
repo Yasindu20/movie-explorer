@@ -5,13 +5,18 @@ module.exports = {
     '<rootDir>/src/setupTests.js'
   ],
   moduleNameMapper: {
-    // Add explicit mapping for react-router-dom
     '^react-router-dom$': '<rootDir>/__mocks__/react-router-dom.js',
-    // Keep any other mappings you need
+    '^axios$': '<rootDir>/__mocks__/axios.js'
   },
   transform: {
     '^.+\\.(js|jsx)$': 'babel-jest'
   },
+  transformIgnorePatterns: [
+    '/node_modules/(?!(axios)/)'
+  ],
+  testPathIgnorePatterns: [
+    '/node_modules/'
+  ],
   collectCoverageFrom: [
     'src/**/*.{js,jsx}',
     '!src/index.js',
