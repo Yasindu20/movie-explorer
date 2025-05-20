@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { 
-  Container, 
-  Typography, 
-  Grid, 
-  Box, 
-  CircularProgress, 
-  Button, 
-  Alert, 
-  Paper, 
+import {
+  Container,
+  Typography,
+  Grid,
+  Box,
+  CircularProgress,
+  Button,
+  Alert,
+  Paper,
   useTheme,
   Chip,
   Slider,
@@ -30,13 +30,13 @@ import {
   Badge,
   SwipeableDrawer
 } from '@mui/material';
-import { 
-  FilterList, 
-  Clear, 
-  TrendingUp, 
-  Star, 
+import {
+  FilterList,
+  Clear,
+  TrendingUp,
+  Star,
   StarBorder,
-  Close, 
+  Close,
   CalendarMonth,
   PlayArrow,
   AddCircle,
@@ -54,6 +54,8 @@ import { useMovieContext } from '../context/MovieContext';
 import { fetchGenres, getImageUrl } from '../api/tmdbApi';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { moods } from '../data/moodData';
+import { MoodOutlined } from '@mui/icons-material';
 
 // AutoPlaySwipeableViews component with auto-play functionality
 const AutoPlaySwipeableViews = autoPlay(SwipeableViews);
@@ -83,23 +85,23 @@ const fetchNewReleases = async () => {
 const HomePage = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  
+
   // Responsive breakpoints using useMediaQuery - Mobile First approach
   const isXsScreen = useMediaQuery(theme.breakpoints.only('xs'));
   const isSmScreen = useMediaQuery(theme.breakpoints.only('sm'));
   const isTouchDevice = useMediaQuery('(hover: none)');
-  
-  const { 
-    trendingMovies, 
-    isLoading, 
-    error, 
-    loadTrendingMovies, 
-    page, 
+
+  const {
+    trendingMovies,
+    isLoading,
+    error,
+    loadTrendingMovies,
+    page,
     totalPages,
     darkMode,
     addToFavorites
   } = useMovieContext();
-  
+
   // State for filters
   const [genres, setGenres] = useState([]);
   const [loadingGenres, setLoadingGenres] = useState(false);
@@ -108,7 +110,7 @@ const HomePage = () => {
   const [selectedYear, setSelectedYear] = useState('');
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState(0);
-  
+
   // State for hero slideshow
   const [activeStep, setActiveStep] = useState(0);
   const [newReleases, setNewReleases] = useState([]);
@@ -116,10 +118,10 @@ const HomePage = () => {
   const [autoplay, setAutoplay] = useState(true);
   const [detailsDrawerOpen, setDetailsDrawerOpen] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState(null);
-  
+
   // Ref for slideshow touch area
   const slideshowRef = useRef(null);
-  
+
   // Generate years for dropdown (from 1900 to current year)
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: currentYear - 1900 + 1 }, (_, i) => currentYear - i);
@@ -134,7 +136,7 @@ const HomePage = () => {
         const validReleases = releases
           .filter(movie => movie.backdrop_path && movie.overview)
           .slice(0, 5);
-        
+
         setNewReleases(validReleases);
         if (validReleases.length > 0) {
           setSelectedMovie(validReleases[0]);
@@ -145,7 +147,7 @@ const HomePage = () => {
         setLoadingNewReleases(false);
       }
     };
-    
+
     loadNewReleases();
   }, []);
 
@@ -172,14 +174,14 @@ const HomePage = () => {
 
     getGenres();
   }, []);
-  
+
   // Update selected movie when active step changes
   useEffect(() => {
     if (newReleases.length > 0 && activeStep < newReleases.length) {
       setSelectedMovie(newReleases[activeStep]);
     }
   }, [activeStep, newReleases]);
-  
+
   // Count active filters
   useEffect(() => {
     let count = 0;
@@ -195,7 +197,7 @@ const HomePage = () => {
   }, [newReleases.length]);
 
   const handleBack = useCallback(() => {
-    setActiveStep((prevActiveStep) => 
+    setActiveStep((prevActiveStep) =>
       prevActiveStep === 0 ? newReleases.length - 1 : prevActiveStep - 1
     );
   }, [newReleases.length]);
@@ -203,7 +205,7 @@ const HomePage = () => {
   const handleStepChange = useCallback((step) => {
     setActiveStep(step);
   }, []);
-  
+
   // Autoplay management
   const pauseAutoplay = useCallback(() => {
     setAutoplay(false);
@@ -212,12 +214,12 @@ const HomePage = () => {
   const resumeAutoplay = useCallback(() => {
     setAutoplay(true);
   }, []);
-  
+
   // Drawer management
   const toggleDetailsDrawer = (open) => () => {
     setDetailsDrawerOpen(open);
   };
-  
+
   // Load more trending movies
   const handleLoadMore = () => {
     loadTrendingMovies(page + 1);
@@ -231,40 +233,40 @@ const HomePage = () => {
       setSelectedGenre(genreId);
     }
   };
-  
+
   // Handle rating range change
   const handleRatingChange = (event, newValue) => {
     setRatingRange(newValue);
   };
-  
+
   // Handle year selection
   const handleYearChange = (event) => {
     setSelectedYear(event.target.value);
   };
-  
+
   // Clear all filters
   const handleClearFilters = () => {
     setSelectedGenre(null);
     setRatingRange([0, 10]);
     setSelectedYear('');
   };
-  
+
   // Toggle filter dialog
   const toggleFilterDialog = () => {
     setFilterDialogOpen(!filterDialogOpen);
   };
-  
+
   // Navigate to movie details
   const navigateToMovie = (movieId) => {
     navigate(`/movie/${movieId}`);
   };
-  
+
   // Add to favorites with animation
   const handleAddToFavorites = (movie) => {
     addToFavorites(movie);
     // Could add a toast notification here
   };
-  
+
   // Format rating marks for slider
   const ratingMarks = [
     { value: 0, label: '0' },
@@ -274,28 +276,28 @@ const HomePage = () => {
     { value: 8, label: '8' },
     { value: 10, label: '10' }
   ];
-  
+
   // Filter movies by all selected criteria
   const filteredMovies = trendingMovies.filter(movie => {
     // Filter by genre
-    const passesGenreFilter = !selectedGenre || 
+    const passesGenreFilter = !selectedGenre ||
       (movie.genre_ids && movie.genre_ids.includes(selectedGenre));
-    
+
     // Filter by rating
     const rating = movie.vote_average || 0;
     const passesRatingFilter = rating >= ratingRange[0] && rating <= ratingRange[1];
-    
+
     // Filter by year
     let passesYearFilter = true;
     if (selectedYear) {
       const releaseYear = movie.release_date ? new Date(movie.release_date).getFullYear() : null;
       passesYearFilter = releaseYear === selectedYear;
     }
-    
+
     // Movie must pass all active filters
     return passesGenreFilter && passesRatingFilter && passesYearFilter;
   });
-  
+
   // Get genre names for a movie
   const getGenreNames = (genreIds) => {
     if (!genreIds || !genres.length) return [];
@@ -304,25 +306,25 @@ const HomePage = () => {
       .filter(Boolean)
       .map(genre => genre.name);
   };
-  
+
   // Format release date
   const formatReleaseDate = (dateString) => {
     if (!dateString) return 'Coming Soon';
-    
+
     const date = new Date(dateString);
     const now = new Date();
-    
+
     // If the movie was released in the last 14 days, show "X days ago"
     const dayDiff = Math.floor((now - date) / (1000 * 60 * 60 * 24));
     if (dayDiff < 14 && dayDiff >= 0) {
       return dayDiff === 0 ? 'Released today!' : `Released ${dayDiff} day${dayDiff === 1 ? '' : 's'} ago`;
     }
-    
+
     // If the movie is yet to be released, show "Coming in X days"
     if (dayDiff < 0) {
       return `Coming in ${Math.abs(dayDiff)} days`;
     }
-    
+
     // Otherwise show the formatted date
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'long',
@@ -330,7 +332,7 @@ const HomePage = () => {
       year: 'numeric'
     });
   };
-  
+
   // Truncate text to a specific length
   const truncateText = (text, maxLength) => {
     if (!text || text.length <= maxLength) return text;
@@ -369,8 +371,8 @@ const HomePage = () => {
               // Moved right to avoid overlapping with release date
               right: { xs: 10, sm: 16, md: 40 },
               zIndex: 10,
-              background: theme.palette.mode === 'dark' 
-                ? 'linear-gradient(90deg, #f44336 0%, #ff9800 100%)' 
+              background: theme.palette.mode === 'dark'
+                ? 'linear-gradient(90deg, #f44336 0%, #ff9800 100%)'
                 : 'linear-gradient(90deg, #d32f2f 0%, #f57c00 100%)',
               color: 'white',
               px: { xs: 1.5, sm: 2 },
@@ -394,14 +396,14 @@ const HomePage = () => {
               }
             }}
           >
-            <NewReleases sx={{ 
-              mr: 0.5, 
-              fontSize: { xs: '1rem', sm: '1.25rem' } 
+            <NewReleases sx={{
+              mr: 0.5,
+              fontSize: { xs: '1rem', sm: '1.25rem' }
             }} />
-            <Typography 
-              variant="subtitle2" 
-              component="span" 
-              sx={{ 
+            <Typography
+              variant="subtitle2"
+              component="span"
+              sx={{
                 fontWeight: 'bold',
                 fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' }
               }}
@@ -409,7 +411,7 @@ const HomePage = () => {
               New Releases
             </Typography>
           </Box>
-        
+
           {/* Slideshow with AutoPlay */}
           <AutoPlaySwipeableViews
             axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
@@ -478,13 +480,13 @@ const HomePage = () => {
                         },
                       }}
                     />
-                    
+
                     {/* Content Overlay - Mobile-first approach */}
-                    <Container 
-                      maxWidth="xl" 
-                      sx={{ 
-                        position: 'relative', 
-                        zIndex: 2, 
+                    <Container
+                      maxWidth="xl"
+                      sx={{
+                        position: 'relative',
+                        zIndex: 2,
                         height: '100%',
                         display: 'flex',
                         flexDirection: 'column',
@@ -516,27 +518,27 @@ const HomePage = () => {
                               >
                                 {formatReleaseDate(movie.release_date)}
                               </Typography>
-                              
+
                               {/* Movie Title with Glow Effect - Responsive typography */}
                               <Typography
                                 variant="h2"
                                 component="h1"
                                 sx={{
                                   fontWeight: 800,
-                                  textShadow: darkMode 
-                                    ? '0 0 20px rgba(255,255,255,0.3), 0 2px 10px rgba(0,0,0,0.5)' 
+                                  textShadow: darkMode
+                                    ? '0 0 20px rgba(255,255,255,0.3), 0 2px 10px rgba(0,0,0,0.5)'
                                     : '0 2px 10px rgba(0,0,0,0.3)',
                                   mb: { xs: 1, sm: 2 },
                                   // Mobile-first typography scaling
-                                  fontSize: { 
-                                    xs: '1.75rem', 
-                                    sm: '2.5rem', 
-                                    md: '3.5rem', 
-                                    lg: '4rem' 
+                                  fontSize: {
+                                    xs: '1.75rem',
+                                    sm: '2.5rem',
+                                    md: '3.5rem',
+                                    lg: '4rem'
                                   },
                                   lineHeight: { xs: 1.1, sm: 1.2 },
-                                  background: darkMode 
-                                    ? 'linear-gradient(45deg, #fff 30%, #bbb 90%)' 
+                                  background: darkMode
+                                    ? 'linear-gradient(45deg, #fff 30%, #bbb 90%)'
                                     : 'linear-gradient(45deg, #111 30%, #333 90%)',
                                   WebkitBackgroundClip: 'text',
                                   WebkitTextFillColor: darkMode ? 'transparent' : 'transparent',
@@ -545,17 +547,17 @@ const HomePage = () => {
                               >
                                 {isXsScreen ? truncateText(movie.title, 50) : movie.title}
                               </Typography>
-                              
+
                               {/* Movie Info Chips - Mobile optimized */}
-                              <Box sx={{ 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                flexWrap: 'wrap', 
-                                mb: { xs: 1, sm: 2 }, 
+                              <Box sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                flexWrap: 'wrap',
+                                mb: { xs: 1, sm: 2 },
                                 gap: { xs: 0.5, sm: 1 }
                               }}>
                                 <Chip
-                                  icon={<Star sx={{ 
+                                  icon={<Star sx={{
                                     color: 'gold !important',
                                     fontSize: { xs: '0.9rem', sm: 'inherit' }
                                   }} />}
@@ -572,7 +574,7 @@ const HomePage = () => {
                                     mb: { xs: 0.5, sm: 0 }
                                   }}
                                 />
-                                
+
                                 <Chip
                                   icon={<CalendarMonth sx={{ fontSize: { xs: '0.9rem', sm: 'inherit' } }} />}
                                   label={movie.release_date ? new Date(movie.release_date).getFullYear() : 'TBA'}
@@ -587,7 +589,7 @@ const HomePage = () => {
                                     mb: { xs: 0.5, sm: 0 }
                                   }}
                                 />
-                                
+
                                 {getGenreNames(movie.genre_ids).slice(0, isXsScreen ? 1 : isSmScreen ? 2 : 3).map(genre => (
                                   <Chip
                                     key={genre}
@@ -605,7 +607,7 @@ const HomePage = () => {
                                   />
                                 ))}
                               </Box>
-                              
+
                               {/* Movie Overview Text - Adaptive for mobile - SHORTENED */}
                               {!isXsScreen && (
                                 <Typography
@@ -626,11 +628,11 @@ const HomePage = () => {
                                   {movie.overview}
                                 </Typography>
                               )}
-                              
+
                               {/* Action Buttons - Mobile optimized */}
-                              <Box sx={{ 
-                                display: 'flex', 
-                                flexWrap: 'wrap', 
+                              <Box sx={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
                                 gap: { xs: 1, sm: 2 },
                                 mt: { xs: 1, sm: 0 }
                               }}>
@@ -646,8 +648,8 @@ const HomePage = () => {
                                     fontWeight: 'bold',
                                     boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
                                     backdropFilter: 'blur(4px)',
-                                    background: theme.palette.mode === 'dark' 
-                                      ? 'linear-gradient(45deg, #1565C0 30%, #0D47A1 90%)' 
+                                    background: theme.palette.mode === 'dark'
+                                      ? 'linear-gradient(45deg, #1565C0 30%, #0D47A1 90%)'
                                       : 'linear-gradient(45deg, #1976D2 30%, #1565C0 90%)',
                                     '&:hover': {
                                       transform: 'translateY(-2px) scale(1.03)',
@@ -657,10 +659,10 @@ const HomePage = () => {
                                     fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' }
                                   }}
                                 >
-                                  <PlayArrow sx={{ mr: 0.5, fontSize: { xs: '1rem', sm: '1.25rem' } }} /> 
+                                  <PlayArrow sx={{ mr: 0.5, fontSize: { xs: '1rem', sm: '1.25rem' } }} />
                                   Watch Details
                                 </Button>
-                                
+
                                 {isXsScreen ? (
                                   <IconButton
                                     color="primary"
@@ -697,7 +699,7 @@ const HomePage = () => {
                                       fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' }
                                     }}
                                   >
-                                    <AddCircle sx={{ mr: 0.5, fontSize: { xs: '1rem', sm: '1.25rem' } }} /> 
+                                    <AddCircle sx={{ mr: 0.5, fontSize: { xs: '1rem', sm: '1.25rem' } }} />
                                     Add to List
                                   </Button>
                                 )}
@@ -712,7 +714,7 @@ const HomePage = () => {
               </Box>
             ))}
           </AutoPlaySwipeableViews>
-          
+
           {/* Slideshow Navigation Dots - Mobile Optimized */}
           <Box
             sx={{
@@ -750,11 +752,11 @@ const HomePage = () => {
                 >
                   <FiberManualRecord
                     sx={{
-                      fontSize: index === activeStep 
-                        ? { xs: 10, sm: 12, md: 14 } 
+                      fontSize: index === activeStep
+                        ? { xs: 10, sm: 12, md: 14 }
                         : { xs: 8, sm: 9, md: 10 },
-                      color: index === activeStep 
-                        ? theme.palette.primary.main 
+                      color: index === activeStep
+                        ? theme.palette.primary.main
                         : theme.palette.text.secondary,
                       transition: 'all 0.3s ease',
                     }}
@@ -763,7 +765,7 @@ const HomePage = () => {
               ))}
             </Paper>
           </Box>
-          
+
           {/* Arrow Navigation Controls - Touch-friendly and responsive */}
           <IconButton
             onClick={handleBack}
@@ -792,7 +794,7 @@ const HomePage = () => {
           >
             <KeyboardArrowLeft />
           </IconButton>
-          
+
           <IconButton
             onClick={handleNext}
             aria-label="Next movie"
@@ -820,7 +822,7 @@ const HomePage = () => {
           >
             <KeyboardArrowRight />
           </IconButton>
-          
+
           {/* Touch indication for mobile - appears briefly when page loads */}
           {isTouchDevice && (
             <Fade in={true} timeout={1000}>
@@ -858,8 +860,8 @@ const HomePage = () => {
         </Box>
       ) : (
         // Loading state for hero section - Mobile responsive
-        <Box 
-          sx={{ 
+        <Box
+          sx={{
             height: { xs: '30vh', sm: '35vh', md: '40vh', lg: '45vh' }, // Reduced loading height
             display: 'flex',
             justifyContent: 'center',
@@ -893,9 +895,9 @@ const HomePage = () => {
       >
         {selectedMovie && (
           <Box sx={{ p: 2 }}>
-            <Box sx={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
+            <Box sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
               alignItems: 'center',
               mb: 2
             }}>
@@ -906,7 +908,7 @@ const HomePage = () => {
                 <Close />
               </IconButton>
             </Box>
-            
+
             <Box sx={{ display: 'flex', mb: 2 }}>
               <Box
                 component="img"
@@ -929,11 +931,11 @@ const HomePage = () => {
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
                   {getGenreNames(selectedMovie.genre_ids).map(genre => (
-                    <Chip 
-                      key={genre} 
-                      label={genre} 
-                      size="small" 
-                      sx={{ mr: 0.5, mb: 0.5 }} 
+                    <Chip
+                      key={genre}
+                      label={genre}
+                      size="small"
+                      sx={{ mr: 0.5, mb: 0.5 }}
                     />
                   ))}
                 </Box>
@@ -945,11 +947,11 @@ const HomePage = () => {
                 </Box>
               </Box>
             </Box>
-            
+
             <Typography variant="body1" paragraph>
               {selectedMovie.overview}
             </Typography>
-            
+
             <Button
               variant="contained"
               fullWidth
@@ -967,10 +969,10 @@ const HomePage = () => {
 
       <Container maxWidth="xl" sx={{ mt: 0, mb: 6 }}>
         {/* Search Bar with rounded edges - Mobile optimized */}
-        <Box sx={{ 
-          mb: { xs: 3, sm: 4, md: 5 }, 
-          transform: 'translateY(-50%)', 
-          position: 'relative', 
+        <Box sx={{
+          mb: { xs: 3, sm: 4, md: 5 },
+          transform: 'translateY(-50%)',
+          position: 'relative',
           zIndex: 2,
           display: newReleases.length > 0 ? 'block' : 'none'
         }}>
@@ -989,42 +991,136 @@ const HomePage = () => {
           </Paper>
         </Box>
 
+        {/* Mood Discovery Section */}
+        <Box sx={{ mb: 6 }}>
+          <Typography
+            variant="h5"
+            component="h2"
+            sx={{
+              fontWeight: 'bold',
+              mb: 3,
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          >
+            <MoodOutlined sx={{ mr: 1 }} />
+            Discover by Mood
+          </Typography>
+
+          <Box
+            sx={{
+              display: 'flex',
+              overflowX: 'auto',
+              pb: 2,
+              gap: 2,
+              '&::-webkit-scrollbar': {
+                height: 8,
+              },
+              '&::-webkit-scrollbar-track': {
+                backgroundColor: 'rgba(0,0,0,0.05)',
+                borderRadius: 4,
+              },
+              '&::-webkit-scrollbar-thumb': {
+                backgroundColor: 'rgba(0,0,0,0.2)',
+                borderRadius: 4,
+              }
+            }}
+          >
+            {moods.map((mood) => (
+              <Box
+                key={mood.id}
+                sx={{
+                  minWidth: { xs: 180, sm: 220 },
+                  height: 140,
+                  borderRadius: 3,
+                  overflow: 'hidden',
+                  position: 'relative',
+                  cursor: 'pointer',
+                  background: mood.colorScheme.background,
+                  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-5px) scale(1.03)',
+                    boxShadow: '0 10px 20px rgba(0,0,0,0.2)'
+                  }
+                }}
+                onClick={() => navigate(`/moods/${mood.id}`)}
+              >
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.2)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    p: 2,
+                    color: mood.colorScheme.textColor
+                  }}
+                >
+                  <Typography
+                    variant="h2"
+                    component="div"
+                    sx={{ mb: 1, fontSize: '2.5rem' }}
+                  >
+                    {mood.emoji}
+                  </Typography>
+                  <Typography
+                    variant="h6"
+                    component="div"
+                    sx={{
+                      fontWeight: 'bold',
+                      textAlign: 'center',
+                      textShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                    }}
+                  >
+                    {mood.name}
+                  </Typography>
+                </Box>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+
         {/* Filter Controls Bar - Mobile-first approach */}
-        <Box sx={{ 
-          mb: { xs: 2, sm: 3, md: 4 }, 
-          display: 'flex', 
-          justifyContent: 'space-between', 
+        <Box sx={{
+          mb: { xs: 2, sm: 3, md: 4 },
+          display: 'flex',
+          justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap'
         }}>
-          <Box sx={{ 
-            display: 'flex', 
+          <Box sx={{
+            display: 'flex',
             alignItems: 'center',
             mb: { xs: 2, md: 0 },
             width: { xs: '100%', sm: 'auto' }
           }}>
-            <Typography 
-              variant="h4" 
-              component="h2" 
-              sx={{ 
-                fontWeight: 800, 
+            <Typography
+              variant="h4"
+              component="h2"
+              sx={{
+                fontWeight: 800,
                 // Mobile-first typography
                 fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem', lg: '2.25rem' },
                 display: 'flex',
                 alignItems: 'center',
-                background: darkMode 
-                  ? 'linear-gradient(90deg, #3f51b5 0%, #2196f3 100%)' 
+                background: darkMode
+                  ? 'linear-gradient(90deg, #3f51b5 0%, #2196f3 100%)'
                   : 'linear-gradient(90deg, #1a237e 0%, #0d47a1 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
               }}
             >
-              <TrendingUp 
-                color="primary" 
-                sx={{ 
+              <TrendingUp
+                color="primary"
+                sx={{
                   fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem', lg: '2.25rem' },
                   mr: { xs: 0.5, sm: 1 }
-                }} 
+                }}
               />
               Trending Movies
               {activeFilters > 0 && (
@@ -1036,7 +1132,7 @@ const HomePage = () => {
               )}
             </Typography>
           </Box>
-          
+
           <Box sx={{ width: { xs: '100%', sm: 'auto' } }}>
             <Badge badgeContent={activeFilters} color="primary" invisible={activeFilters === 0}>
               <Button
@@ -1061,9 +1157,9 @@ const HomePage = () => {
 
         {/* Movies Grid - Mobile-first responsive grid */}
         {error && (
-          <Alert 
-            severity="error" 
-            sx={{ 
+          <Alert
+            severity="error"
+            sx={{
               mb: { xs: 2, sm: 3, md: 4 },
               borderRadius: 2,
               boxShadow: 2
@@ -1074,11 +1170,11 @@ const HomePage = () => {
         )}
 
         {isLoading && trendingMovies.length === 0 ? (
-          <Box 
-            sx={{ 
-              display: 'flex', 
-              justifyContent: 'center', 
-              alignItems: 'center', 
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
               height: { xs: '30vh', sm: '40vh', md: '50vh' },
               flexDirection: 'column',
               gap: 2
@@ -1092,10 +1188,10 @@ const HomePage = () => {
         ) : (
           <>
             {filteredMovies.length === 0 ? (
-              <Paper 
-                elevation={3} 
-                sx={{ 
-                  p: { xs: 2, sm: 3, md: 4 }, 
+              <Paper
+                elevation={3}
+                sx={{
+                  p: { xs: 2, sm: 3, md: 4 },
                   mb: { xs: 2, sm: 3, md: 4 },
                   borderRadius: 3,
                   textAlign: 'center'
@@ -1107,8 +1203,8 @@ const HomePage = () => {
                 <Typography variant="body1" color="text.secondary" paragraph>
                   Try adjusting your filter criteria or clear filters to see all trending movies.
                 </Typography>
-                <Button 
-                  variant="contained" 
+                <Button
+                  variant="contained"
                   onClick={handleClearFilters}
                   startIcon={<Clear />}
                 >
@@ -1119,15 +1215,15 @@ const HomePage = () => {
               <Fade in={!isLoading} timeout={800}>
                 <Grid container spacing={{ xs: 2, sm: 3 }}>
                   {filteredMovies.map((movie, index) => (
-                    <Grid 
-                      item 
-                      key={movie.id} 
+                    <Grid
+                      item
+                      key={movie.id}
                       // Mobile-first responsive grid
-                      xs={6} 
-                      sm={4} 
-                      md={3} 
+                      xs={6}
+                      sm={4}
+                      md={3}
                       lg={3}
-                      sx={{ 
+                      sx={{
                         transform: {
                           xs: 'none', // Disable the transform on very small screens
                           sm: `translateY(${index % 2 === 0 ? '10px' : '0px'})`
@@ -1135,11 +1231,11 @@ const HomePage = () => {
                         transition: 'transform 0.3s ease-in-out'
                       }}
                     >
-                      <Zoom 
-                        in={true} 
-                        style={{ 
+                      <Zoom
+                        in={true}
+                        style={{
                           // Reduced delay on mobile for better perceived performance
-                          transitionDelay: `${isXsScreen ? index * 30 : index * 50}ms` 
+                          transitionDelay: `${isXsScreen ? index * 30 : index * 50}ms`
                         }}
                       >
                         <Box>
@@ -1153,16 +1249,16 @@ const HomePage = () => {
             )}
 
             {filteredMovies.length > 0 && !activeFilters && page < totalPages && (
-              <Box 
-                sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'center', 
-                  mt: { xs: 3, sm: 4, md: 6 }, 
-                  mb: { xs: 1, sm: 2 } 
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  mt: { xs: 3, sm: 4, md: 6 },
+                  mb: { xs: 1, sm: 2 }
                 }}
               >
-                <Button 
-                  variant="contained" 
+                <Button
+                  variant="contained"
                   onClick={handleLoadMore}
                   disabled={isLoading}
                   size={isXsScreen ? "medium" : "large"}
@@ -1210,19 +1306,19 @@ const HomePage = () => {
           timeout: 500,
         }}
       >
-        <DialogTitle sx={{ 
-          pb: 1, 
-          display: 'flex', 
+        <DialogTitle sx={{
+          pb: 1,
+          display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           borderBottom: 1,
           borderColor: 'divider'
         }}>
-          <Typography 
-            variant="h5" 
-            sx={{ 
-              fontWeight: 'bold', 
-              display: 'flex', 
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 'bold',
+              display: 'flex',
               alignItems: 'center',
               fontSize: { xs: '1.25rem', sm: '1.5rem' }
             }}
@@ -1230,11 +1326,11 @@ const HomePage = () => {
             <FilterList sx={{ mr: 1 }} />
             Movie Filters
             {activeFilters > 0 && (
-              <Chip 
-                label={activeFilters} 
-                size="small" 
-                color="primary" 
-                sx={{ ml: 1 }} 
+              <Chip
+                label={activeFilters}
+                size="small"
+                color="primary"
+                sx={{ ml: 1 }}
               />
             )}
           </Typography>
@@ -1242,15 +1338,15 @@ const HomePage = () => {
             <Close />
           </IconButton>
         </DialogTitle>
-        
+
         <DialogContent dividers sx={{ px: { xs: 2, sm: 3 }, pb: 1 }}>
           <Stack spacing={4} sx={{ my: 1 }}>
             {/* Genre Filter - Touch-friendly */}
             <Box>
-              <Typography 
-                variant="h6" 
-                gutterBottom 
-                sx={{ 
+              <Typography
+                variant="h6"
+                gutterBottom
+                sx={{
                   fontWeight: 'bold',
                   display: 'flex',
                   alignItems: 'center',
@@ -1272,7 +1368,7 @@ const HomePage = () => {
                       color="primary"
                       variant={selectedGenre === genre.id ? "filled" : "outlined"}
                       onClick={() => handleGenreClick(genre.id)}
-                      sx={{ 
+                      sx={{
                         m: 0.5,
                         borderRadius: '50px',
                         transition: 'all 0.2s ease',
@@ -1289,18 +1385,18 @@ const HomePage = () => {
                 )}
               </Box>
             </Box>
-            
+
             <Divider flexItem />
-            
+
             {/* Rating Filter - Mobile optimized */}
             <Box>
-              <Typography 
-                variant="h6" 
-                gutterBottom 
-                sx={{ 
+              <Typography
+                variant="h6"
+                gutterBottom
+                sx={{
                   fontWeight: 'bold',
                   display: 'flex',
-                  alignItems: 'center', 
+                  alignItems: 'center',
                   mb: 3,
                   fontSize: { xs: '1.1rem', sm: '1.25rem' }
                 }}
@@ -1340,11 +1436,11 @@ const HomePage = () => {
                     }
                   }}
                 />
-                <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  mt: 2 
+                <Box sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mt: 2
                 }}>
                   <StarBorder sx={{ color: 'gold', mr: 1 }} />
                   <Typography variant="body1" fontWeight="medium">
@@ -1354,15 +1450,15 @@ const HomePage = () => {
                 </Box>
               </Box>
             </Box>
-            
+
             <Divider flexItem />
-            
+
             {/* Year Filter - Touch-friendly dropdown */}
             <Box>
-              <Typography 
-                variant="h6" 
-                gutterBottom 
-                sx={{ 
+              <Typography
+                variant="h6"
+                gutterBottom
+                sx={{
                   fontWeight: 'bold',
                   display: 'flex',
                   alignItems: 'center',
@@ -1373,8 +1469,8 @@ const HomePage = () => {
                 <CalendarMonth sx={{ mr: 1 }} />
                 Release Year
               </Typography>
-              <FormControl 
-                variant="outlined" 
+              <FormControl
+                variant="outlined"
                 fullWidth
                 sx={{
                   '& .MuiOutlinedInput-root': {
@@ -1417,17 +1513,17 @@ const HomePage = () => {
             </Box>
           </Stack>
         </DialogContent>
-        
-        <DialogActions sx={{ 
-          px: { xs: 2, sm: 3 }, 
-          py: { xs: 3, sm: 2 }, 
+
+        <DialogActions sx={{
+          px: { xs: 2, sm: 3 },
+          py: { xs: 3, sm: 2 },
           flexDirection: { xs: 'column', sm: 'row' },
           justifyContent: { xs: 'center', sm: 'space-between' },
           gap: { xs: 1, sm: 0 }
         }}>
           {activeFilters > 0 && (
-            <Button 
-              onClick={handleClearFilters} 
+            <Button
+              onClick={handleClearFilters}
               color="error"
               startIcon={<Clear />}
               variant="outlined"
@@ -1441,9 +1537,9 @@ const HomePage = () => {
               Clear All Filters
             </Button>
           )}
-          <Button 
-            onClick={toggleFilterDialog} 
-            variant="contained" 
+          <Button
+            onClick={toggleFilterDialog}
+            variant="contained"
             color="primary"
             fullWidth={isXsScreen}
             sx={{

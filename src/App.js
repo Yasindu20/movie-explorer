@@ -14,21 +14,22 @@ import MovieDetailsPage from './pages/MovieDetailsPage';
 import SearchResultsPage from './pages/SearchResultsPage';
 import FavoritesPage from './pages/FavoritesPage';
 import LoginPage from './pages/LoginPage';
+import MoodDiscoveryPage from './pages/MoodDiscoveryPage';
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
-  
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  
+
   return children;
 };
 
 const App = () => {
   const { darkMode } = useMovieContext();
-  
+
   // Create theme based on dark mode preference
   const theme = createTheme({
     palette: {
@@ -64,7 +65,7 @@ const App = () => {
       },
     },
   });
-  
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -72,31 +73,43 @@ const App = () => {
         <Header />
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          
+
           <Route path="/" element={
             <ProtectedRoute>
               <HomePage />
             </ProtectedRoute>
           } />
-          
+
           <Route path="/search" element={
             <ProtectedRoute>
               <SearchResultsPage />
             </ProtectedRoute>
           } />
-          
+
           <Route path="/movie/:id" element={
             <ProtectedRoute>
               <MovieDetailsPage />
             </ProtectedRoute>
           } />
-          
+
           <Route path="/favorites" element={
             <ProtectedRoute>
               <FavoritesPage />
             </ProtectedRoute>
           } />
-          
+
+          <Route path="/moods" element={
+            <ProtectedRoute>
+              <MoodDiscoveryPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/moods/:moodId" element={
+            <ProtectedRoute>
+              <MoodDiscoveryPage />
+            </ProtectedRoute>
+          } />
+
           {/* Redirect to home for any unknown routes */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
