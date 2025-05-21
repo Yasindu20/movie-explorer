@@ -28,10 +28,13 @@ import {
   Language, 
   AttachMoney,
   PlayArrow,
-  Share
+  Share,
+  Recommend
 } from '@mui/icons-material';
 import { fetchMovieDetails, getImageUrl } from '../api/tmdbApi';
 import { useMovieContext } from '../context/MovieContext';
+import { useRecommendation } from '../context/RecommendationContext';
+import RatingSystem from '../components/RatingSystem';
 import YouTube from 'react-youtube';
 
 const MovieDetailsPage = () => {
@@ -39,6 +42,7 @@ const MovieDetailsPage = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const { favorites, addToFavorites, removeFromFavorites } = useMovieContext();
+  const { addToWatchHistory } = useRecommendation();
   
   // Responsive breakpoints
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -71,6 +75,9 @@ const MovieDetailsPage = () => {
             setTrailerKey(trailer.key);
           }
         }
+        
+        // Add to watch history
+        addToWatchHistory(Number(id));
       } catch (err) {
         console.error('Error fetching movie details:', err);
         setError('Failed to load movie details. Please try again later.');
@@ -83,7 +90,7 @@ const MovieDetailsPage = () => {
     
     // Scroll to top when component mounts
     window.scrollTo(0, 0);
-  }, [id]);
+  }, [id, addToWatchHistory]);
 
   // Handle favorite toggle
   const handleFavoriteToggle = () => {
@@ -97,6 +104,11 @@ const MovieDetailsPage = () => {
   // Go back to previous page
   const handleGoBack = () => {
     navigate(-1);
+  };
+
+  // Navigate to recommendations
+  const navigateToRecommendations = () => {
+    navigate('/recommendations');
   };
 
   // Format runtime
@@ -355,6 +367,11 @@ const MovieDetailsPage = () => {
                   >
                     {movie.title}
                   </Typography>
+
+                  {/* User Rating Component */}
+                  <Box sx={{ mb: 2 }}>
+                    <RatingSystem movieId={movie.id} size="large" />
+                  </Box>
                   
                   {/* Rating and Genres - Glass Morphism Effect */}
                   <Box 
@@ -471,6 +488,32 @@ const MovieDetailsPage = () => {
                       }}
                     >
                       {isFavorite ? 'Remove Favorite' : 'Add to Favorites'}
+                    </Button>
+
+                    <Button
+                      variant="outlined"
+                      color="info"
+                      size={isMobile ? "medium" : "large"}
+                      startIcon={<Recommend />}
+                      onClick={navigateToRecommendations}
+                      sx={{
+                        borderRadius: 30,
+                        px: { xs: 2, sm: 3 },
+                        py: { xs: 1, sm: 1.2 },
+                        fontWeight: 'bold',
+                        borderColor: 'rgba(255, 255, 255, 0.5)',
+                        color: 'white',
+                        backdropFilter: 'blur(10px)',
+                        background: 'rgba(0, 0, 0, 0.3)',
+                        '&:hover': {
+                          borderColor: 'white',
+                          background: 'rgba(0, 0, 0, 0.5)',
+                          transform: 'translateY(-3px) scale(1.02)'
+                        },
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      See Recommendations
                     </Button>
                     
                     <Tooltip title="Share movie">
@@ -859,6 +902,31 @@ const MovieDetailsPage = () => {
                     ))}
                   </Grid>
                 </Paper>
+
+                {/* Recommendations Button */}
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="large"
+                    startIcon={<Recommend />}
+                    onClick={navigateToRecommendations}
+                    sx={{
+                      borderRadius: 30,
+                      px: 4,
+                      py: 1.5,
+                      fontWeight: 'bold',
+                      boxShadow: '0 4px 20px rgba(25, 118, 210, 0.4)',
+                      '&:hover': {
+                        transform: 'translateY(-3px) scale(1.02)',
+                        boxShadow: '0 6px 30px rgba(25, 118, 210, 0.6)'
+                      },
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    View Your Personalized Recommendations
+                  </Button>
+                </Box>
               </Grid>
             </>
           )}

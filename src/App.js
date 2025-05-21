@@ -4,6 +4,7 @@ import { ThemeProvider, CssBaseline } from '@mui/material';
 import { createTheme } from '@mui/material/styles';
 import { useMovieContext } from './context/MovieContext';
 import { useAuth } from './context/AuthContext';
+import { RecommendationProvider } from './context/RecommendationContext';
 
 // Layout component
 import Header from './components/Header';
@@ -15,6 +16,7 @@ import SearchResultsPage from './pages/SearchResultsPage';
 import FavoritesPage from './pages/FavoritesPage';
 import LoginPage from './pages/LoginPage';
 import MoodDiscoveryPage from './pages/MoodDiscoveryPage';
+import RecommendationsPage from './pages/RecommendationsPage';
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {
@@ -39,6 +41,12 @@ const App = () => {
       },
       secondary: {
         main: '#e91e63',
+      },
+      info: {
+        main: '#03a9f4',
+      },
+      success: {
+        main: '#4caf50',
       },
     },
     typography: {
@@ -69,51 +77,59 @@ const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
-        <Header />
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
+      <RecommendationProvider>
+        <Router>
+          <Header />
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
 
-          <Route path="/" element={
-            <ProtectedRoute>
-              <HomePage />
-            </ProtectedRoute>
-          } />
+            <Route path="/" element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            } />
 
-          <Route path="/search" element={
-            <ProtectedRoute>
-              <SearchResultsPage />
-            </ProtectedRoute>
-          } />
+            <Route path="/search" element={
+              <ProtectedRoute>
+                <SearchResultsPage />
+              </ProtectedRoute>
+            } />
 
-          <Route path="/movie/:id" element={
-            <ProtectedRoute>
-              <MovieDetailsPage />
-            </ProtectedRoute>
-          } />
+            <Route path="/movie/:id" element={
+              <ProtectedRoute>
+                <MovieDetailsPage />
+              </ProtectedRoute>
+            } />
 
-          <Route path="/favorites" element={
-            <ProtectedRoute>
-              <FavoritesPage />
-            </ProtectedRoute>
-          } />
+            <Route path="/favorites" element={
+              <ProtectedRoute>
+                <FavoritesPage />
+              </ProtectedRoute>
+            } />
 
-          <Route path="/moods" element={
-            <ProtectedRoute>
-              <MoodDiscoveryPage />
-            </ProtectedRoute>
-          } />
+            <Route path="/moods" element={
+              <ProtectedRoute>
+                <MoodDiscoveryPage />
+              </ProtectedRoute>
+            } />
 
-          <Route path="/moods/:moodId" element={
-            <ProtectedRoute>
-              <MoodDiscoveryPage />
-            </ProtectedRoute>
-          } />
+            <Route path="/moods/:moodId" element={
+              <ProtectedRoute>
+                <MoodDiscoveryPage />
+              </ProtectedRoute>
+            } />
 
-          {/* Redirect to home for any unknown routes */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Router>
+            <Route path="/recommendations" element={
+              <ProtectedRoute>
+                <RecommendationsPage />
+              </ProtectedRoute>
+            } />
+
+            {/* Redirect to home for any unknown routes */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Router>
+      </RecommendationProvider>
     </ThemeProvider>
   );
 };
