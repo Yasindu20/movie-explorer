@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
 import { fetchTrendingMovies, searchMovies, fetchMoviesByMood } from '../api/tmdbApi';
 import { moods, getMoodById } from '../data/moodData';
 
@@ -230,22 +230,9 @@ export const MovieProvider = ({ children }) => {
     dispatch({ type: actions.TOGGLE_DARK_MODE });
   };
 
-  // Select a mood and load movies for it
-  const selectMood = async (moodId) => {
-    const mood = getMoodById(moodId);
-    if (!mood) return;
+  const loadMoodMovies = useCallback(async (mood, page = 1) => {
+    if (!mood) return; // Safety check
 
-    dispatch({ type: actions.SELECT_MOOD, payload: mood });
-    loadMoodMovies(mood);
-  };
-
-  // Clear the selected mood
-  const clearMood = () => {
-    dispatch({ type: actions.CLEAR_MOOD });
-  };
-
-  // Load movies for a specific mood
-  const loadMoodMovies = async (mood, page = 1) => {
     dispatch({ type: actions.FETCH_MOOD_MOVIES_START });
     try {
       const data = await fetchMoviesByMood(mood, page);
@@ -259,7 +246,20 @@ export const MovieProvider = ({ children }) => {
         payload: error.message
       });
     }
-  };
+  }, [dispatch]);
+
+  // Select a mood and load movies for it
+  const selectMood = useCallback(async (moodId) => {
+    const mood = getMoodById(moodId);
+    if (!mood) return;
+
+    dispatch({ type: actions.SELECT_MOOD, payload: mood });
+    loadMoodMovies(mood);
+  }, [dispatch, loadMoodMovies]);
+
+  const clearMood = useCallback(() => {
+    dispatch({ type: actions.CLEAR_MOOD });
+  }, [dispatch]);
 
   return (
     <MovieContext.Provider
