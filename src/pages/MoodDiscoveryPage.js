@@ -50,6 +50,7 @@ const MoodDiscoveryPage = () => {
         return () => {
             clearMood();
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Handle mood selection
