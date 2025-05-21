@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef } from 'react';
 import { fetchMovieDetails } from '../api/tmdbApi';
 import { useAuth } from './AuthContext';
 import { useMovieContext } from './MovieContext';
@@ -107,6 +107,12 @@ export const RecommendationProvider = ({ children }) => {
     const [state, dispatch] = useReducer(recommendationReducer, initialState);
     const { user } = useAuth();
     const { favorites } = useMovieContext();
+
+    // Create refs to store function references (to fix circular dependencies)
+    const getHistoryRecommendationsRef = useRef(null);
+    const getGenreRecommendationsRef = useRef(null);
+    const getActorRecommendationsRef = useRef(null);
+    const getPersonalizedTopPicksRef = useRef(null);
 
     // Define updateGenrePreferences before using it in hooks
     const updateGenrePreferences = useCallback(() => {
@@ -567,6 +573,11 @@ export const RecommendationProvider = ({ children }) => {
         }
     }, [state.watchHistory]);
 
+    // Store the history recommendations function in the ref
+    useEffect(() => {
+        getHistoryRecommendationsRef.current = getRecommendationsBasedOnWatchHistory;
+    }, [getRecommendationsBasedOnWatchHistory]);
+
     // Get recommendations based on favorite genres
     const getRecommendationsBasedOnGenres = useCallback(async () => {
         const favoriteGenreIds = Object.keys(state.favoriteGenres);
@@ -625,6 +636,11 @@ export const RecommendationProvider = ({ children }) => {
         }
     }, [state.favoriteGenres, state.watchHistory]);
 
+    // Store the genre recommendations function in the ref
+    useEffect(() => {
+        getGenreRecommendationsRef.current = getRecommendationsBasedOnGenres;
+    }, [getRecommendationsBasedOnGenres]);
+
     // Get recommendations based on favorite actors
     const getRecommendationsBasedOnActors = useCallback(async () => {
         const favoriteActorIds = Object.keys(state.favoriteActors);
@@ -681,7 +697,13 @@ export const RecommendationProvider = ({ children }) => {
         }
     }, [state.favoriteActors, state.watchHistory]);
 
+    // Store the actor recommendations function in the ref
+    useEffect(() => {
+        getActorRecommendationsRef.current = getRecommendationsBasedOnActors;
+    }, [getRecommendationsBasedOnActors]);
+
     // Get personalized top picks (combination of all recommendation types)
+    // FIX: Remove unnecessary dependencies from the dependency array
     const getPersonalizedTopPicks = useCallback(async (historyRecsParam = null, genreRecsParam = null, actorRecsParam = null) => {
         try {
             dispatch({ type: actions.SET_LOADING, payload: true });
@@ -754,36 +776,30 @@ export const RecommendationProvider = ({ children }) => {
         }
     }, [
         state.recommendedMovies,
-        getRecommendationsBasedOnWatchHistory,
-        getRecommendationsBasedOnGenres,
-        getRecommendationsBasedOnActors,
+        // Removed these three dependencies to fix the circular reference:
+        // getRecommendationsBasedOnWatchHistory,
+        // getRecommendationsBasedOnGenres,
+        // getRecommendationsBasedOnActors,
         calculateMovieSimilarity
     ]);
 
+    // Store the personalized top picks function in the ref
+    useEffect(() => {
+        getPersonalizedTopPicksRef.current = getPersonalizedTopPicks;
+    }, [getPersonalizedTopPicks]);
+
     // Load all recommendations
+    // FIX: Use refs instead of direct function calls
     const loadAllRecommendations = useCallback(async () => {
-        // Create local copies of the functions to avoid circular references
-        const getHistoryRecommendations = async () => {
-            return await getRecommendationsBasedOnWatchHistory();
-        };
-
-        const getGenreRecommendations = async () => {
-            return await getRecommendationsBasedOnGenres();
-        };
-
-        const getActorRecommendations = async () => {
-            return await getRecommendationsBasedOnActors();
-        };
-
         dispatch({ type: actions.SET_LOADING, payload: true });
         try {
-            // Execute these sequentially instead of in parallel using local functions
-            const historyRecs = await getHistoryRecommendations();
-            const genreRecs = await getGenreRecommendations();
-            const actorRecs = await getActorRecommendations();
+            // Use the refs instead of direct function calls
+            const historyRecs = await getHistoryRecommendationsRef.current();
+            const genreRecs = await getGenreRecommendationsRef.current();
+            const actorRecs = await getActorRecommendationsRef.current();
 
             // Only calculate top picks after the other recommendations are loaded
-            await getPersonalizedTopPicks(historyRecs, genreRecs, actorRecs);
+            await getPersonalizedTopPicksRef.current(historyRecs, genreRecs, actorRecs);
 
             dispatch({ type: actions.SET_LOADING, payload: false });
         } catch (error) {
@@ -791,7 +807,7 @@ export const RecommendationProvider = ({ children }) => {
             dispatch({ type: actions.SET_ERROR, payload: 'Failed to load recommendations' });
             dispatch({ type: actions.SET_LOADING, payload: false });
         }
-    }, [getPersonalizedTopPicks]);
+    }, []); // No dependencies needed since we're using refs
 
     return (
         <RecommendationContext.Provider
