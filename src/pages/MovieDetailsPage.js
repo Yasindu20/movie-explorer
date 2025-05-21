@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  Container, 
-  Grid, 
-  Typography, 
-  Box, 
-  Paper, 
-  Chip, 
-  CircularProgress, 
-  Button, 
-  Alert, 
+import {
+  Container,
+  Grid,
+  Typography,
+  Box,
+  Paper,
+  Chip,
+  CircularProgress,
+  Button,
+  Alert,
   IconButton,
   Tooltip,
   useTheme,
@@ -18,14 +18,14 @@ import {
   Fade,
   Zoom
 } from '@mui/material';
-import { 
-  ArrowBack, 
-  Favorite, 
-  FavoriteBorder, 
-  Star, 
-  CalendarMonth, 
-  AccessTime, 
-  Language, 
+import {
+  ArrowBack,
+  Favorite,
+  FavoriteBorder,
+  Star,
+  CalendarMonth,
+  AccessTime,
+  Language,
   AttachMoney,
   PlayArrow,
   Share,
@@ -43,10 +43,10 @@ const MovieDetailsPage = () => {
   const theme = useTheme();
   const { favorites, addToFavorites, removeFromFavorites } = useMovieContext();
   const { addToWatchHistory } = useRecommendation();
-  
+
   // Responsive breakpoints
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
+
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -61,11 +61,29 @@ const MovieDetailsPage = () => {
     const getMovieDetails = async () => {
       setLoading(true);
       setError(null);
-      
+
       try {
-        const data = await fetchMovieDetails(id);
+        console.log(`Fetching details for movie ID: ${id}`);
+
+        // Add a timeout to prevent infinite loading
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Request timeout')), 10000)
+        );
+
+        // Race the API call with a timeout
+        const data = await Promise.race([
+          fetchMovieDetails(id),
+          timeoutPromise
+        ]);
+
+        console.log('Movie data received:', data ? 'success' : 'empty');
+
+        if (!data) {
+          throw new Error('Failed to load movie data');
+        }
+
         setMovie(data);
-        
+
         // Find trailer
         if (data.videos && data.videos.results) {
           const trailer = data.videos.results.find(
@@ -75,19 +93,27 @@ const MovieDetailsPage = () => {
             setTrailerKey(trailer.key);
           }
         }
-        
-        // Add to watch history
-        addToWatchHistory(Number(id));
+
+        // Try/catch within this block to isolate watch history issues
+        try {
+          // Add to watch history with the data we already fetched
+          await addToWatchHistory(Number(id), data);
+          console.log('Added to watch history successfully');
+        } catch (watchHistoryError) {
+          console.error('Watch history error:', watchHistoryError);
+          // Continue without failing the whole operation
+        }
+
       } catch (err) {
         console.error('Error fetching movie details:', err);
-        setError('Failed to load movie details. Please try again later.');
+        setError(`Failed to load movie details: ${err.message}`);
       } finally {
         setLoading(false);
       }
     };
 
     getMovieDetails();
-    
+
     // Scroll to top when component mounts
     window.scrollTo(0, 0);
   }, [id, addToWatchHistory]);
@@ -147,9 +173,9 @@ const MovieDetailsPage = () => {
 
   if (loading) {
     return (
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'center',
         alignItems: 'center',
         height: '100vh',
         flexDirection: 'column',
@@ -168,9 +194,9 @@ const MovieDetailsPage = () => {
     return (
       <Container maxWidth="md" sx={{ py: 8 }}>
         <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>{error}</Alert>
-        <Button 
-          startIcon={<ArrowBack />} 
-          onClick={handleGoBack} 
+        <Button
+          startIcon={<ArrowBack />}
+          onClick={handleGoBack}
           variant="contained"
           sx={{ borderRadius: 2 }}
         >
@@ -184,9 +210,9 @@ const MovieDetailsPage = () => {
     return (
       <Container maxWidth="md" sx={{ py: 8 }}>
         <Alert severity="warning" sx={{ mb: 3, borderRadius: 2 }}>Movie not found</Alert>
-        <Button 
-          startIcon={<ArrowBack />} 
-          onClick={handleGoBack} 
+        <Button
+          startIcon={<ArrowBack />}
+          onClick={handleGoBack}
           variant="contained"
           sx={{ borderRadius: 2 }}
         >
@@ -208,12 +234,12 @@ const MovieDetailsPage = () => {
         }}
       >
         {/* Back Button - Always Visible */}
-        <Box 
-          sx={{ 
-            position: 'absolute', 
-            top: { xs: 16, sm: 24 }, 
+        <Box
+          sx={{
+            position: 'absolute',
+            top: { xs: 16, sm: 24 },
             left: { xs: 16, sm: 24 },
-            zIndex: 10 
+            zIndex: 10
           }}
         >
           <Zoom in={true} timeout={500}>
@@ -239,7 +265,7 @@ const MovieDetailsPage = () => {
             </Button>
           </Zoom>
         </Box>
-        
+
         {/* Background Image with Parallax Effect */}
         <Box
           sx={{
@@ -276,14 +302,14 @@ const MovieDetailsPage = () => {
             animation: 'slowZoom 30s infinite alternate ease-in-out'
           }}
         />
-        
+
         {/* Movie Info Overlay - Animation with Fade In */}
-        <Container 
-          maxWidth="xl" 
-          sx={{ 
-            height: '100%', 
-            position: 'relative', 
-            zIndex: 2, 
+        <Container
+          maxWidth="xl"
+          sx={{
+            height: '100%',
+            position: 'relative',
+            zIndex: 2,
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-end',
@@ -294,7 +320,7 @@ const MovieDetailsPage = () => {
           <Fade in={true} timeout={1000}>
             <Grid container spacing={3} alignItems="flex-end">
               {/* Movie Poster - Floating Animation */}
-              <Grid item xs={12} sm={4} md={3} lg={3} 
+              <Grid item xs={12} sm={4} md={3} lg={3}
                 sx={{
                   display: 'flex',
                   justifyContent: { xs: 'center', sm: 'flex-start' }
@@ -327,7 +353,7 @@ const MovieDetailsPage = () => {
                   />
                 </Zoom>
               </Grid>
-              
+
               {/* Movie Title and Info */}
               <Grid item xs={12} sm={8} md={9} lg={9}>
                 <Box>
@@ -350,7 +376,7 @@ const MovieDetailsPage = () => {
                   >
                     {movie.release_date ? new Date(movie.release_date).getFullYear() : 'Coming Soon'}
                   </Typography>
-                  
+
                   {/* Movie Title with Text Glow */}
                   <Typography
                     variant="h2"
@@ -372,10 +398,10 @@ const MovieDetailsPage = () => {
                   <Box sx={{ mb: 2 }}>
                     <RatingSystem movieId={movie.id} size="large" />
                   </Box>
-                  
+
                   {/* Rating and Genres - Glass Morphism Effect */}
-                  <Box 
-                    sx={{ 
+                  <Box
+                    sx={{
                       display: 'flex',
                       alignItems: 'center',
                       flexWrap: 'wrap',
@@ -401,7 +427,7 @@ const MovieDetailsPage = () => {
                         {movie.vote_average?.toFixed(1) || 'N/A'}/10
                       </Typography>
                     </Box>
-                    
+
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                       {movie.genres?.slice(0, isMobile ? 2 : 4).map((genre) => (
                         <Chip
@@ -421,11 +447,11 @@ const MovieDetailsPage = () => {
                       ))}
                     </Box>
                   </Box>
-                  
+
                   {/* Action Buttons - Floating and Glowing */}
-                  <Box 
-                    sx={{ 
-                      display: 'flex', 
+                  <Box
+                    sx={{
+                      display: 'flex',
                       flexWrap: 'wrap',
                       gap: 2,
                       mt: { xs: 2, sm: 3 },
@@ -456,7 +482,7 @@ const MovieDetailsPage = () => {
                         {showTrailer ? 'Hide Trailer' : 'Watch Trailer'}
                       </Button>
                     )}
-                    
+
                     <Button
                       variant="contained"
                       color={isFavorite ? 'secondary' : 'primary'}
@@ -468,19 +494,19 @@ const MovieDetailsPage = () => {
                         px: { xs: 2, sm: 3 },
                         py: { xs: 1, sm: 1.2 },
                         fontWeight: 'bold',
-                        backgroundColor: isFavorite 
+                        backgroundColor: isFavorite
                           ? alpha(theme.palette.secondary.main, 0.9)
                           : alpha(theme.palette.primary.main, 0.9),
                         backdropFilter: 'blur(10px)',
-                        boxShadow: isFavorite 
+                        boxShadow: isFavorite
                           ? '0 4px 20px rgba(233, 30, 99, 0.4)'
                           : '0 4px 20px rgba(25, 118, 210, 0.4)',
                         '&:hover': {
-                          backgroundColor: isFavorite 
+                          backgroundColor: isFavorite
                             ? theme.palette.secondary.main
                             : theme.palette.primary.main,
                           transform: 'translateY(-3px) scale(1.02)',
-                          boxShadow: isFavorite 
+                          boxShadow: isFavorite
                             ? '0 6px 30px rgba(233, 30, 99, 0.6)'
                             : '0 6px 30px rgba(25, 118, 210, 0.6)'
                         },
@@ -515,7 +541,7 @@ const MovieDetailsPage = () => {
                     >
                       See Recommendations
                     </Button>
-                    
+
                     <Tooltip title="Share movie">
                       <IconButton
                         aria-label="share"
@@ -540,11 +566,11 @@ const MovieDetailsPage = () => {
           </Fade>
         </Container>
       </Box>
-      
+
       {/* Trailer Section - Conditional Render with Animation */}
       {showTrailer && trailerKey && (
         <Fade in={showTrailer} timeout={500}>
-          <Box sx={{ 
+          <Box sx={{
             position: 'relative',
             height: { xs: 320, sm: 500, md: 650, lg: 750 },
             bgcolor: 'black',
@@ -573,15 +599,15 @@ const MovieDetailsPage = () => {
                   {movie.overview || 'No overview available.'}
                 </Typography>
               </Box>
-              
+
               {/* Movie Stats Cards - 2x2 Grid for Mobile */}
               <Box sx={{ mb: 4 }}>
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
-                    <Paper 
-                      elevation={3} 
-                      sx={{ 
-                        p: 2, 
+                    <Paper
+                      elevation={3}
+                      sx={{
+                        p: 2,
                         textAlign: 'center',
                         display: 'flex',
                         flexDirection: 'column',
@@ -595,17 +621,17 @@ const MovieDetailsPage = () => {
                         Release Date
                       </Typography>
                       <Typography variant="body1" fontWeight="bold">
-                        {movie.release_date 
-                          ? new Date(movie.release_date).toLocaleDateString() 
+                        {movie.release_date
+                          ? new Date(movie.release_date).toLocaleDateString()
                           : 'Unknown'}
                       </Typography>
                     </Paper>
                   </Grid>
                   <Grid item xs={6}>
-                    <Paper 
-                      elevation={3} 
-                      sx={{ 
-                        p: 2, 
+                    <Paper
+                      elevation={3}
+                      sx={{
+                        p: 2,
                         textAlign: 'center',
                         display: 'flex',
                         flexDirection: 'column',
@@ -624,10 +650,10 @@ const MovieDetailsPage = () => {
                     </Paper>
                   </Grid>
                   <Grid item xs={6}>
-                    <Paper 
-                      elevation={3} 
-                      sx={{ 
-                        p: 2, 
+                    <Paper
+                      elevation={3}
+                      sx={{
+                        p: 2,
                         textAlign: 'center',
                         display: 'flex',
                         flexDirection: 'column',
@@ -646,10 +672,10 @@ const MovieDetailsPage = () => {
                     </Paper>
                   </Grid>
                   <Grid item xs={6}>
-                    <Paper 
-                      elevation={3} 
-                      sx={{ 
-                        p: 2, 
+                    <Paper
+                      elevation={3}
+                      sx={{
+                        p: 2,
                         textAlign: 'center',
                         display: 'flex',
                         flexDirection: 'column',
@@ -671,25 +697,25 @@ const MovieDetailsPage = () => {
               </Box>
             </Grid>
           )}
-          
+
           {/* Tablet and Desktop Layout */}
           {!isMobile && (
             <>
               {/* Left Column - Hidden on Mobile */}
               <Grid item xs={12} md={4}>
                 {/* Movie Stats Cards */}
-                <Paper 
-                  elevation={3} 
-                  sx={{ 
-                    p: { sm: 2, md: 3 }, 
+                <Paper
+                  elevation={3}
+                  sx={{
+                    p: { sm: 2, md: 3 },
                     borderRadius: 3,
                     mb: 4
                   }}
                 >
-                  <Typography 
-                    variant="h6" 
-                    sx={{ 
-                      fontWeight: 'bold', 
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 'bold',
                       mb: 2,
                       borderBottom: 1,
                       borderColor: 'divider',
@@ -698,11 +724,11 @@ const MovieDetailsPage = () => {
                   >
                     Movie Facts
                   </Typography>
-                  
+
                   <Grid container spacing={3}>
                     <Grid item xs={12} sm={6} md={12}>
-                      <Box sx={{ 
-                        display: 'flex', 
+                      <Box sx={{
+                        display: 'flex',
                         alignItems: 'center',
                         mb: 2
                       }}>
@@ -712,17 +738,17 @@ const MovieDetailsPage = () => {
                             Release Date
                           </Typography>
                           <Typography variant="body1" fontWeight="bold">
-                            {movie.release_date 
-                              ? new Date(movie.release_date).toLocaleDateString() 
+                            {movie.release_date
+                              ? new Date(movie.release_date).toLocaleDateString()
                               : 'Unknown'}
                           </Typography>
                         </Box>
                       </Box>
                     </Grid>
-                    
+
                     <Grid item xs={12} sm={6} md={12}>
-                      <Box sx={{ 
-                        display: 'flex', 
+                      <Box sx={{
+                        display: 'flex',
                         alignItems: 'center',
                         mb: 2
                       }}>
@@ -737,10 +763,10 @@ const MovieDetailsPage = () => {
                         </Box>
                       </Box>
                     </Grid>
-                    
+
                     <Grid item xs={12} sm={6} md={12}>
-                      <Box sx={{ 
-                        display: 'flex', 
+                      <Box sx={{
+                        display: 'flex',
                         alignItems: 'center',
                         mb: 2
                       }}>
@@ -755,10 +781,10 @@ const MovieDetailsPage = () => {
                         </Box>
                       </Box>
                     </Grid>
-                    
+
                     <Grid item xs={12} sm={6} md={12}>
-                      <Box sx={{ 
-                        display: 'flex', 
+                      <Box sx={{
+                        display: 'flex',
                         alignItems: 'center'
                       }}>
                         <AttachMoney color="primary" sx={{ fontSize: '1.5rem', mr: 1.5 }} />
@@ -774,21 +800,21 @@ const MovieDetailsPage = () => {
                     </Grid>
                   </Grid>
                 </Paper>
-                
+
                 {/* Production Companies */}
                 {movie.production_companies?.length > 0 && (
-                  <Paper 
-                    elevation={3} 
-                    sx={{ 
-                      p: { sm: 2, md: 3 }, 
+                  <Paper
+                    elevation={3}
+                    sx={{
+                      p: { sm: 2, md: 3 },
                       borderRadius: 3,
                       mb: 4
                     }}
                   >
-                    <Typography 
-                      variant="h6" 
-                      sx={{ 
-                        fontWeight: 'bold', 
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 'bold',
                         mb: 2,
                         borderBottom: 1,
                         borderColor: 'divider',
@@ -797,7 +823,7 @@ const MovieDetailsPage = () => {
                     >
                       Production
                     </Typography>
-                    
+
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                       {movie.production_companies.map((company) => (
                         <Box key={company.id} sx={{ display: 'flex', alignItems: 'center' }}>
@@ -815,10 +841,10 @@ const MovieDetailsPage = () => {
                               }}
                             />
                           ) : (
-                            <Box 
-                              sx={{ 
-                                width: 60, 
-                                height: 30, 
+                            <Box
+                              sx={{
+                                width: 60,
+                                height: 30,
                                 bgcolor: 'action.hover',
                                 display: 'flex',
                                 alignItems: 'center',
@@ -839,7 +865,7 @@ const MovieDetailsPage = () => {
                   </Paper>
                 )}
               </Grid>
-              
+
               {/* Right Column - Main Content */}
               <Grid item xs={12} md={8}>
                 {/* Overview Section */}
@@ -851,7 +877,7 @@ const MovieDetailsPage = () => {
                     {movie.overview || 'No overview available.'}
                   </Typography>
                 </Paper>
-                
+
                 {/* Cast Section with Hover Effects */}
                 <Paper elevation={3} sx={{ p: { sm: 3, md: 4 }, borderRadius: 3, mb: 4 }}>
                   <Typography variant="h5" component="h2" fontWeight="bold" gutterBottom>
@@ -876,8 +902,8 @@ const MovieDetailsPage = () => {
                         >
                           <Box
                             component="img"
-                            src={person.profile_path 
-                              ? getImageUrl(person.profile_path, 'w185') 
+                            src={person.profile_path
+                              ? getImageUrl(person.profile_path, 'w185')
                               : 'https://via.placeholder.com/92x138?text=No+Image'}
                             alt={person.name}
                             sx={{
