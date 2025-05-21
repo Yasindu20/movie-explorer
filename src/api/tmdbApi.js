@@ -67,15 +67,49 @@ export const searchMovies = async (query, page = 1) => {
 
 export const fetchMovieDetails = async (movieId) => {
   try {
+    if (!movieId) {
+      throw new Error('Movie ID is required');
+    }
+    
+    // Add timeout to axios request
     const response = await tmdbApi.get(`${endpoints.movieDetails}/${movieId}`, {
       params: {
         append_to_response: 'videos,credits'
-      }
+      },
+      timeout: 8000 // 8 second timeout
     });
+    
+    if (!response || !response.data) {
+      throw new Error('Invalid response from TMDB API');
+    }
+    
     return response.data;
   } catch (error) {
-    console.error('Error fetching movie details:', error);
-    throw error;
+    console.error(`Error fetching movie details for ID ${movieId}:`, error);
+    
+    // Provide more informative error message based on the type of error
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      const status = error.response.status;
+      if (status === 401) {
+        throw new Error('API key invalid or unauthorized. Check your TMDB API key.');
+      } else if (status === 404) {
+        throw new Error(`Movie with ID ${movieId} not found.`);
+      } else if (status === 429) {
+        throw new Error('Rate limit exceeded. Too many requests to TMDB API.');
+      } else {
+        throw new Error(`TMDB API error: ${status} ${error.response.statusText}`);
+      }
+    } else if (error.request) {
+      // The request was made but no response was received
+      throw new Error('No response from TMDB API. Check your internet connection.');
+    } else if (error.message.includes('timeout')) {
+      throw new Error('Request to TMDB API timed out. Try again later.');
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      throw new Error(`Error fetching movie details: ${error.message}`);
+    }
   }
 };
 

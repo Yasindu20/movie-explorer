@@ -245,7 +245,13 @@ export const RecommendationProvider = ({ children }) => {
     }, [state.watchHistory, state.userRatings, favorites, updateGenrePreferences]);
 
     // Add a movie to watch history
+    // Replace the existing addToWatchHistory function in src/context/RecommendationContext.js
     const addToWatchHistory = useCallback(async (movieId, movieData = null) => {
+        if (!movieId) {
+            console.error('Cannot add to watch history: No movie ID provided');
+            return Promise.reject(new Error('No movie ID provided'));
+        }
+
         try {
             dispatch({ type: actions.SET_LOADING, payload: true });
 
@@ -261,6 +267,8 @@ export const RecommendationProvider = ({ children }) => {
                         lastWatchedAt: new Date().toISOString()
                     }
                 });
+                dispatch({ type: actions.SET_LOADING, payload: false });
+                return Promise.resolve(true);
             } else if (movieData) {
                 // If movie data was provided, use it directly
                 dispatch({
@@ -270,26 +278,43 @@ export const RecommendationProvider = ({ children }) => {
                         lastWatchedAt: new Date().toISOString()
                     }
                 });
+                dispatch({ type: actions.SET_LOADING, payload: false });
+                return Promise.resolve(true);
             } else {
-                // Only fetch if we don't have the data
-                const movieDetails = await fetchMovieDetails(movieId);
+                // Only fetch if we don't have the data - and use a timeout
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Fetch movie details timeout')), 5000)
+                );
 
-                dispatch({
-                    type: actions.ADD_TO_WATCH_HISTORY,
-                    payload: {
-                        ...movieDetails,
-                        lastWatchedAt: new Date().toISOString()
-                    }
-                });
+                try {
+                    const movieDetails = await Promise.race([
+                        fetchMovieDetails(movieId),
+                        timeoutPromise
+                    ]);
+
+                    dispatch({
+                        type: actions.ADD_TO_WATCH_HISTORY,
+                        payload: {
+                            ...movieDetails,
+                            lastWatchedAt: new Date().toISOString()
+                        }
+                    });
+                    dispatch({ type: actions.SET_LOADING, payload: false });
+                    return Promise.resolve(true);
+                } catch (fetchError) {
+                    console.error(`Error fetching movie details for watch history:`, fetchError);
+                    dispatch({ type: actions.SET_ERROR, payload: 'Failed to fetch movie details for watch history' });
+                    dispatch({ type: actions.SET_LOADING, payload: false });
+                    return Promise.reject(fetchError);
+                }
             }
-
-            dispatch({ type: actions.SET_LOADING, payload: false });
         } catch (error) {
             console.error('Error adding to watch history:', error);
             dispatch({ type: actions.SET_ERROR, payload: 'Failed to add movie to watch history' });
             dispatch({ type: actions.SET_LOADING, payload: false });
+            return Promise.reject(error);
         }
-    }, [state.watchHistory]);
+    }, [state.watchHistory, dispatch]);
 
     // Rate a movie
     const rateMovie = useCallback((movieId, rating) => {
