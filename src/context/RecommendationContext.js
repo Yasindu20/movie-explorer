@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
-import { fetchMovieDetails, getImageUrl } from '../api/tmdbApi';
+import { fetchMovieDetails } from '../api/tmdbApi';
 import { useAuth } from './AuthContext';
 import { useMovieContext } from './MovieContext';
 
@@ -179,7 +179,7 @@ export const RecommendationProvider = ({ children }) => {
     if (state.watchHistory.length > 0) {
       updateGenrePreferences();
     }
-  }, [state.watchHistory, state.userRatings]);
+  }, [state.watchHistory, state.userRatings, favorites, updateGenrePreferences]);
 
   // Add a movie to watch history
   const addToWatchHistory = useCallback(async (movieId) => {

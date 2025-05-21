@@ -5,7 +5,6 @@ import {
   Typography,
   Snackbar,
   Alert,
-  Paper,
   Zoom
 } from '@mui/material';
 import { Star, StarBorder } from '@mui/icons-material';

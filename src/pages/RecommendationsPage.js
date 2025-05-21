@@ -5,11 +5,9 @@ import {
   Grid,
   Box,
   Paper,
-  CircularProgress,
   Button,
   Tabs,
   Tab,
-  Divider,
   Chip,
   Card,
   CardMedia,
@@ -34,7 +32,6 @@ import {
   Star,
   StarBorder,
   AutoAwesome,
-  PlayArrow,
   Timeline,
   RefreshRounded,
   InsightsRounded
@@ -42,7 +39,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useRecommendation } from '../context/RecommendationContext';
 import { getImageUrl } from '../api/tmdbApi';
-import MovieCard from '../components/MovieCard';
 import RatingSystem from '../components/RatingSystem';
 
 // Tab Panel Component
