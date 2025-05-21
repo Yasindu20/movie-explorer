@@ -108,6 +108,63 @@ export const RecommendationProvider = ({ children }) => {
   const { user } = useAuth();
   const { favorites } = useMovieContext();
 
+  // Define updateGenrePreferences before using it in hooks
+  const updateGenrePreferences = useCallback(() => {
+    // Create a map of genre popularity
+    const genreScores = {};
+    
+    // Process watch history
+    state.watchHistory.forEach((movie, index) => {
+      // Weigh more recent views higher
+      const recencyWeight = 1 / (index + 1);
+      
+      // Process each genre
+      if (movie.genres) {
+        movie.genres.forEach(genre => {
+          if (!genreScores[genre.id]) {
+            genreScores[genre.id] = {
+              id: genre.id,
+              name: genre.name,
+              score: 0,
+              count: 0
+            };
+          }
+          
+          genreScores[genre.id].count += 1;
+          
+          // Base score for watching a movie of this genre
+          genreScores[genre.id].score += 1 * recencyWeight;
+          
+          // Additional score if the movie was rated highly
+          if (state.userRatings[movie.id] && state.userRatings[movie.id].rating > 3) {
+            genreScores[genre.id].score += (state.userRatings[movie.id].rating - 3) * 2;
+          }
+          
+          // Additional score if the movie is in favorites
+          if (favorites.some(fav => fav.id === movie.id)) {
+            genreScores[genre.id].score += 5;
+          }
+        });
+      }
+    });
+    
+    // Sort genres by score
+    const sortedGenres = Object.values(genreScores).sort((a, b) => b.score - a.score);
+    
+    // Create normalized scores (0-100)
+    const maxScore = sortedGenres.length > 0 ? sortedGenres[0].score : 1;
+    const normalizedGenres = {};
+    
+    sortedGenres.forEach(genre => {
+      normalizedGenres[genre.id] = {
+        ...genre,
+        normalizedScore: Math.round((genre.score / maxScore) * 100)
+      };
+    });
+    
+    dispatch({ type: actions.UPDATE_GENRE_PREFERENCES, payload: normalizedGenres });
+  }, [state.watchHistory, state.userRatings, favorites]);
+
   // Load user data from localStorage
   useEffect(() => {
     if (user) {
@@ -230,63 +287,6 @@ export const RecommendationProvider = ({ children }) => {
       }
     });
   }, []);
-
-  // Update genre preferences based on watch history and ratings
-  const updateGenrePreferences = useCallback(() => {
-    // Create a map of genre popularity
-    const genreScores = {};
-    
-    // Process watch history
-    state.watchHistory.forEach((movie, index) => {
-      // Weigh more recent views higher
-      const recencyWeight = 1 / (index + 1);
-      
-      // Process each genre
-      if (movie.genres) {
-        movie.genres.forEach(genre => {
-          if (!genreScores[genre.id]) {
-            genreScores[genre.id] = {
-              id: genre.id,
-              name: genre.name,
-              score: 0,
-              count: 0
-            };
-          }
-          
-          genreScores[genre.id].count += 1;
-          
-          // Base score for watching a movie of this genre
-          genreScores[genre.id].score += 1 * recencyWeight;
-          
-          // Additional score if the movie was rated highly
-          if (state.userRatings[movie.id] && state.userRatings[movie.id].rating > 3) {
-            genreScores[genre.id].score += (state.userRatings[movie.id].rating - 3) * 2;
-          }
-          
-          // Additional score if the movie is in favorites
-          if (favorites.some(fav => fav.id === movie.id)) {
-            genreScores[genre.id].score += 5;
-          }
-        });
-      }
-    });
-    
-    // Sort genres by score
-    const sortedGenres = Object.values(genreScores).sort((a, b) => b.score - a.score);
-    
-    // Create normalized scores (0-100)
-    const maxScore = sortedGenres.length > 0 ? sortedGenres[0].score : 1;
-    const normalizedGenres = {};
-    
-    sortedGenres.forEach(genre => {
-      normalizedGenres[genre.id] = {
-        ...genre,
-        normalizedScore: Math.round((genre.score / maxScore) * 100)
-      };
-    });
-    
-    dispatch({ type: actions.UPDATE_GENRE_PREFERENCES, payload: normalizedGenres });
-  }, [state.watchHistory, state.userRatings, favorites]);
 
   // Update actor preferences based on watch history and ratings
   const updateActorPreferences = useCallback(async () => {
