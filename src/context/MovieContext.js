@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { fetchTrendingMovies, searchMovies } from '../api/tmdbApi';
+import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
+import { fetchTrendingMovies, searchMovies, fetchMoviesByMood } from '../api/tmdbApi';
+import { moods, getMoodById } from '../data/moodData';
 
 // Create context
 const MovieContext = createContext();
@@ -14,7 +15,13 @@ const initialState = {
   totalPages: 0,
   searchQuery: '',
   favorites: [],
-  darkMode: false
+  darkMode: false,
+  selectedMood: null,
+  moodMovies: [],
+  moodPage: 1,
+  moodTotalPages: 0,
+  moodLoading: false,
+  moodError: null,
 };
 
 // Actions
@@ -29,7 +36,12 @@ const actions = {
   RESET_SEARCH: 'RESET_SEARCH',
   ADD_TO_FAVORITES: 'ADD_TO_FAVORITES',
   REMOVE_FROM_FAVORITES: 'REMOVE_FROM_FAVORITES',
-  TOGGLE_DARK_MODE: 'TOGGLE_DARK_MODE'
+  TOGGLE_DARK_MODE: 'TOGGLE_DARK_MODE',
+  SELECT_MOOD: 'SELECT_MOOD',
+  CLEAR_MOOD: 'CLEAR_MOOD',
+  FETCH_MOOD_MOVIES_START: 'FETCH_MOOD_MOVIES_START',
+  FETCH_MOOD_MOVIES_SUCCESS: 'FETCH_MOOD_MOVIES_SUCCESS',
+  FETCH_MOOD_MOVIES_ERROR: 'FETCH_MOOD_MOVIES_ERROR',
 };
 
 // Reducer
@@ -41,49 +53,84 @@ const movieReducer = (state, action) => {
       return {
         ...state,
         isLoading: false,
-        trendingMovies: action.payload.page === 1 
-          ? action.payload.results 
+        trendingMovies: action.payload.page === 1
+          ? action.payload.results
           : [...state.trendingMovies, ...action.payload.results],
         page: action.payload.page,
         totalPages: action.payload.total_pages
       };
     case actions.FETCH_TRENDING_ERROR:
       return { ...state, isLoading: false, error: action.payload };
-    
+
     case actions.SEARCH_MOVIES_START:
       return { ...state, isLoading: true, error: null };
     case actions.SEARCH_MOVIES_SUCCESS:
       return {
         ...state,
         isLoading: false,
-        searchResults: action.payload.page === 1 
-          ? action.payload.results 
+        searchResults: action.payload.page === 1
+          ? action.payload.results
           : [...state.searchResults, ...action.payload.results],
         page: action.payload.page,
         totalPages: action.payload.total_pages
       };
     case actions.SEARCH_MOVIES_ERROR:
       return { ...state, isLoading: false, error: action.payload };
-    
+
     case actions.SET_SEARCH_QUERY:
       return { ...state, searchQuery: action.payload };
     case actions.RESET_SEARCH:
       return { ...state, searchResults: [], page: 1, totalPages: 0, searchQuery: '' };
-    
+
     case actions.ADD_TO_FAVORITES:
-      return { 
-        ...state, 
+      return {
+        ...state,
         favorites: [...state.favorites, action.payload]
       };
     case actions.REMOVE_FROM_FAVORITES:
-      return { 
-        ...state, 
-        favorites: state.favorites.filter(movie => movie.id !== action.payload) 
+      return {
+        ...state,
+        favorites: state.favorites.filter(movie => movie.id !== action.payload)
       };
-    
+
     case actions.TOGGLE_DARK_MODE:
       return { ...state, darkMode: !state.darkMode };
-    
+
+    case actions.SELECT_MOOD:
+      return {
+        ...state,
+        selectedMood: action.payload,
+        moodMovies: [],
+        moodPage: 1,
+        moodTotalPages: 0
+      };
+
+    case actions.CLEAR_MOOD:
+      return {
+        ...state,
+        selectedMood: null,
+        moodMovies: [],
+        moodPage: 1,
+        moodTotalPages: 0
+      };
+
+    case actions.FETCH_MOOD_MOVIES_START:
+      return { ...state, moodLoading: true, moodError: null };
+
+    case actions.FETCH_MOOD_MOVIES_SUCCESS:
+      return {
+        ...state,
+        moodLoading: false,
+        moodMovies: action.payload.page === 1
+          ? action.payload.results
+          : [...state.moodMovies, ...action.payload.results],
+        moodPage: action.payload.page,
+        moodTotalPages: action.payload.total_pages
+      };
+
+    case actions.FETCH_MOOD_MOVIES_ERROR:
+      return { ...state, moodLoading: false, moodError: action.payload };
+
     default:
       return state;
   }
@@ -97,18 +144,18 @@ export const MovieProvider = ({ children }) => {
   useEffect(() => {
     const savedFavorites = localStorage.getItem('favorites');
     const darkModePreference = localStorage.getItem('darkMode');
-    
+
     if (savedFavorites) {
       const parsedFavorites = JSON.parse(savedFavorites);
       parsedFavorites.forEach(movie => {
         dispatch({ type: actions.ADD_TO_FAVORITES, payload: movie });
       });
     }
-    
+
     if (darkModePreference === 'true') {
       dispatch({ type: actions.TOGGLE_DARK_MODE });
     }
-    
+
     // Load last search query
     const lastSearch = localStorage.getItem('lastSearch');
     if (lastSearch) {
@@ -138,14 +185,14 @@ export const MovieProvider = ({ children }) => {
     dispatch({ type: actions.FETCH_TRENDING_START });
     try {
       const data = await fetchTrendingMovies(page);
-      dispatch({ 
-        type: actions.FETCH_TRENDING_SUCCESS, 
-        payload: data 
+      dispatch({
+        type: actions.FETCH_TRENDING_SUCCESS,
+        payload: data
       });
     } catch (error) {
-      dispatch({ 
-        type: actions.FETCH_TRENDING_ERROR, 
-        payload: error.message 
+      dispatch({
+        type: actions.FETCH_TRENDING_ERROR,
+        payload: error.message
       });
     }
   };
@@ -155,14 +202,14 @@ export const MovieProvider = ({ children }) => {
     dispatch({ type: actions.SEARCH_MOVIES_START });
     try {
       const data = await searchMovies(query, page);
-      dispatch({ 
-        type: actions.SEARCH_MOVIES_SUCCESS, 
-        payload: data 
+      dispatch({
+        type: actions.SEARCH_MOVIES_SUCCESS,
+        payload: data
       });
     } catch (error) {
-      dispatch({ 
-        type: actions.SEARCH_MOVIES_ERROR, 
-        payload: error.message 
+      dispatch({
+        type: actions.SEARCH_MOVIES_ERROR,
+        payload: error.message
       });
     }
   };
@@ -183,6 +230,37 @@ export const MovieProvider = ({ children }) => {
     dispatch({ type: actions.TOGGLE_DARK_MODE });
   };
 
+  const loadMoodMovies = useCallback(async (mood, page = 1) => {
+    if (!mood) return; // Safety check
+
+    dispatch({ type: actions.FETCH_MOOD_MOVIES_START });
+    try {
+      const data = await fetchMoviesByMood(mood, page);
+      dispatch({
+        type: actions.FETCH_MOOD_MOVIES_SUCCESS,
+        payload: data
+      });
+    } catch (error) {
+      dispatch({
+        type: actions.FETCH_MOOD_MOVIES_ERROR,
+        payload: error.message
+      });
+    }
+  }, [dispatch]);
+
+  // Select a mood and load movies for it
+  const selectMood = useCallback(async (moodId) => {
+    const mood = getMoodById(moodId);
+    if (!mood) return;
+
+    dispatch({ type: actions.SELECT_MOOD, payload: mood });
+    loadMoodMovies(mood);
+  }, [dispatch, loadMoodMovies]);
+
+  const clearMood = useCallback(() => {
+    dispatch({ type: actions.CLEAR_MOOD });
+  }, [dispatch]);
+
   return (
     <MovieContext.Provider
       value={{
@@ -192,7 +270,11 @@ export const MovieProvider = ({ children }) => {
         resetSearch,
         addToFavorites,
         removeFromFavorites,
-        toggleDarkMode
+        toggleDarkMode,
+        selectMood,
+        clearMood,
+        loadMoodMovies,
+        moods
       }}
     >
       {children}

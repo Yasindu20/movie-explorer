@@ -1,38 +1,39 @@
 import React, { useState } from 'react';
-import { 
-  AppBar, 
-  Toolbar, 
-  Typography, 
-  Button, 
-  IconButton, 
-  Box, 
-  Menu, 
-  MenuItem, 
-  Avatar, 
-  Tooltip, 
-  Switch, 
-  Drawer, 
-  List, 
-  ListItem, 
-  ListItemIcon, 
-  ListItemText, 
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  IconButton,
+  Box,
+  Menu,
+  MenuItem,
+  Avatar,
+  Tooltip,
+  Switch,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
   Divider,
   useMediaQuery,
   useTheme
 } from '@mui/material';
-import { 
-  DarkMode, 
-  LightMode, 
-  AccountCircle, 
-  MovieFilter, 
-  Home, 
-  Favorite, 
-  Menu as MenuIcon, 
-  Logout 
+import {
+  DarkMode,
+  LightMode,
+  AccountCircle,
+  MovieFilter,
+  Home,
+  Favorite,
+  Menu as MenuIcon,
+  Logout
 } from '@mui/icons-material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useMovieContext } from '../context/MovieContext';
+import { MoodOutlined } from '@mui/icons-material';
 
 const Header = () => {
   const { user, logout } = useAuth();
@@ -40,11 +41,11 @@ const Header = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  
+
   // State for user menu
   const [anchorEl, setAnchorEl] = useState(null);
   const openMenu = Boolean(anchorEl);
-  
+
   // State for mobile drawer
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -77,6 +78,9 @@ const Header = () => {
   const navLinks = [
     { text: 'Home', icon: <Home />, path: '/' },
     { text: 'Favorites', icon: <Favorite />, path: '/favorites' },
+    { text: 'Home', icon: <Home />, path: '/' },
+    { text: 'Moods', icon: <MoodOutlined />, path: '/moods' },
+    { text: 'Favorites', icon: <Favorite />, path: '/favorites' },
   ];
 
   // Mobile drawer content
@@ -94,10 +98,10 @@ const Header = () => {
       <Divider />
       <List>
         {navLinks.map((link) => (
-          <ListItem 
-            button 
-            key={link.text} 
-            component={RouterLink} 
+          <ListItem
+            button
+            key={link.text}
+            component={RouterLink}
             to={link.path}
           >
             <ListItemIcon>{link.icon}</ListItemIcon>
@@ -112,10 +116,10 @@ const Header = () => {
             {darkMode ? <DarkMode /> : <LightMode />}
           </ListItemIcon>
           <ListItemText primary="Dark Mode" />
-          <Switch 
-            checked={darkMode} 
-            onChange={toggleDarkMode} 
-            color="primary" 
+          <Switch
+            checked={darkMode}
+            onChange={toggleDarkMode}
+            color="primary"
           />
         </ListItem>
         {user && (
@@ -234,9 +238,9 @@ const Header = () => {
             </Menu>
           </>
         ) : (
-          <Button 
-            color="inherit" 
-            component={RouterLink} 
+          <Button
+            color="inherit"
+            component={RouterLink}
             to="/login"
             startIcon={<AccountCircle />}
           >
@@ -244,7 +248,7 @@ const Header = () => {
           </Button>
         )}
       </Toolbar>
-      
+
       {/* Mobile drawer */}
       <Drawer
         anchor="left"
