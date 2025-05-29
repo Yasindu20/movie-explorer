@@ -17,6 +17,13 @@ import FavoritesPage from './pages/FavoritesPage';
 import LoginPage from './pages/LoginPage';
 import MoodDiscoveryPage from './pages/MoodDiscoveryPage';
 import RecommendationsPage from './pages/RecommendationsPage';
+import BlogPage from './pages/BlogPage';
+import ListsPage from './pages/ListsPage';
+
+// New pages we need to create
+import BlogDetailsPage from './pages/BlogDetailsPage';
+import ListDetailsPage from './pages/ListDetailsPage';
+import DiscussionPage from './pages/DiscussionPage';
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {
@@ -122,6 +129,39 @@ const App = () => {
             <Route path="/recommendations" element={
               <ProtectedRoute>
                 <RecommendationsPage />
+              </ProtectedRoute>
+            } />
+
+            {/* Blog Routes */}
+            <Route path="/blog" element={
+              <ProtectedRoute>
+                <BlogPage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/blog/:slug" element={
+              <ProtectedRoute>
+                <BlogDetailsPage />
+              </ProtectedRoute>
+            } />
+
+            {/* Lists Routes */}
+            <Route path="/lists" element={
+              <ProtectedRoute>
+                <ListsPage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/list/:id" element={
+              <ProtectedRoute>
+                <ListDetailsPage />
+              </ProtectedRoute>
+            } />
+
+            {/* Discussion Routes */}
+            <Route path="/discussion/:id" element={
+              <ProtectedRoute>
+                <DiscussionPage />
               </ProtectedRoute>
             } />
 

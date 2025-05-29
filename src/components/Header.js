@@ -30,7 +30,9 @@ import {
   Favorite,
   Menu as MenuIcon,
   Logout,
-  Recommend
+  Recommend,
+  Article,
+  PlaylistPlay
 } from '@mui/icons-material';
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -85,11 +87,13 @@ const Header = () => {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
-  // Navigation links
+  // Navigation links - UPDATED with Blog and Lists
   const navLinks = [
     { text: 'Home', icon: <Home />, path: '/' },
     { text: 'Recommendations', icon: <Recommend />, path: '/recommendations', badge: watchHistory.length > 0 },
     { text: 'Moods', icon: <MoodOutlined />, path: '/moods' },
+    { text: 'Blog', icon: <Article />, path: '/blog' },
+    { text: 'Lists', icon: <PlaylistPlay />, path: '/lists' },
     { text: 'Favorites', icon: <Favorite />, path: '/favorites' },
   ];
 
