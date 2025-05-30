@@ -13,7 +13,7 @@ import {
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 
-const LoginForm = () => {
+const LoginForm = ({ onSwitchToRegister }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -141,7 +141,23 @@ const LoginForm = () => {
           Use Demo Credentials
         </Button>
         
-        <Typography variant="body2" color="text.secondary" align="center">
+        {onSwitchToRegister && (
+          <Box sx={{ textAlign: 'center', mt: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              Don't have an account?{' '}
+              <Button
+                variant="text"
+                onClick={onSwitchToRegister}
+                disabled={loading}
+                sx={{ textTransform: 'none' }}
+              >
+                Sign Up
+              </Button>
+            </Typography>
+          </Box>
+        )}
+        
+        <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 2 }}>
           For demo purposes, use: username "user" and password "password"
         </Typography>
       </Box>
