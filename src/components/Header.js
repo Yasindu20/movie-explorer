@@ -18,7 +18,8 @@ import {
   ListItemText,
   Divider,
   useMediaQuery,
-  useTheme
+  useTheme,
+  Badge
 } from '@mui/material';
 import {
   DarkMode,
@@ -28,17 +29,24 @@ import {
   Home,
   Favorite,
   Menu as MenuIcon,
-  Logout
+  Logout,
+  Recommend,
+  Article,
+  PlaylistPlay
 } from '@mui/icons-material';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useMovieContext } from '../context/MovieContext';
 import { MoodOutlined } from '@mui/icons-material';
+import { useRecommendation } from '../context/RecommendationContext';
+import { alpha } from '@mui/material/styles';
 
 const Header = () => {
   const { user, logout } = useAuth();
   const { darkMode, toggleDarkMode } = useMovieContext();
+  const { watchHistory } = useRecommendation();
   const navigate = useNavigate();
+  const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -74,12 +82,18 @@ const Header = () => {
     setDrawerOpen(open);
   };
 
-  // Navigation links
+  // Check if a path is active
+  const isPathActive = (path) => {
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
+  };
+
+  // Navigation links - UPDATED with Blog and Lists
   const navLinks = [
     { text: 'Home', icon: <Home />, path: '/' },
-    { text: 'Favorites', icon: <Favorite />, path: '/favorites' },
-    { text: 'Home', icon: <Home />, path: '/' },
+    { text: 'Recommendations', icon: <Recommend />, path: '/recommendations', badge: watchHistory.length > 0 },
     { text: 'Moods', icon: <MoodOutlined />, path: '/moods' },
+    { text: 'Blog', icon: <Article />, path: '/blog' },
+    { text: 'Lists', icon: <PlaylistPlay />, path: '/lists' },
     { text: 'Favorites', icon: <Favorite />, path: '/favorites' },
   ];
 
@@ -103,8 +117,23 @@ const Header = () => {
             key={link.text}
             component={RouterLink}
             to={link.path}
+            selected={isPathActive(link.path)}
+            sx={{
+              bgcolor: isPathActive(link.path) ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
+              '&:hover': {
+                bgcolor: isPathActive(link.path) ? alpha(theme.palette.primary.main, 0.15) : 'rgba(0, 0, 0, 0.04)'
+              }
+            }}
           >
-            <ListItemIcon>{link.icon}</ListItemIcon>
+            <ListItemIcon>
+              {link.badge ? (
+                <Badge color="error" variant="dot" invisible={!link.badge}>
+                  {link.icon}
+                </Badge>
+              ) : (
+                link.icon
+              )}
+            </ListItemIcon>
             <ListItemText primary={link.text} />
           </ListItem>
         ))}
@@ -175,7 +204,24 @@ const Header = () => {
                 color="inherit"
                 component={RouterLink}
                 to={link.path}
-                startIcon={link.icon}
+                startIcon={
+                  link.badge ? (
+                    <Badge color="error" variant="dot" invisible={!link.badge}>
+                      {link.icon}
+                    </Badge>
+                  ) : (
+                    link.icon
+                  )
+                }
+                sx={{
+                  mx: 0.5,
+                  borderRadius: 2,
+                  px: 2,
+                  bgcolor: isPathActive(link.path) ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
+                  '&:hover': {
+                    bgcolor: isPathActive(link.path) ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.08)'
+                  }
+                }}
               >
                 {link.text}
               </Button>

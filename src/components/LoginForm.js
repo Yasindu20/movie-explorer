@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   TextField, 
@@ -8,19 +8,39 @@ import {
   Alert, 
   InputAdornment, 
   IconButton,
-  CircularProgress
+  CircularProgress,
+  Collapse
 } from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { Visibility, VisibilityOff, CheckCircle } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 
-const LoginForm = () => {
+const LoginForm = ({ onSwitchToRegister }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [formErrors, setFormErrors] = useState({});
-  const { login, error, loading } = useAuth();
+  const [showSuccess, setShowSuccess] = useState(false);
+  const { login, error, successMessage, loading, clearMessages } = useAuth();
 
-  const handleSubmit = (e) => {
+  // Clear messages when component mounts or when switching forms
+  useEffect(() => {
+    clearMessages();
+    return () => clearMessages();
+  }, [clearMessages]);
+
+  // Show success message if login is successful
+  useEffect(() => {
+    if (successMessage) {
+      setShowSuccess(true);
+      // Hide success message after 3 seconds
+      const timer = setTimeout(() => {
+        setShowSuccess(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Basic validation
@@ -37,7 +57,13 @@ const LoginForm = () => {
     setFormErrors({});
     
     // Attempt login
-    login(username, password);
+    const result = await login(username, password);
+    
+    if (result.success) {
+      // Clear form on successful login
+      setUsername('');
+      setPassword('');
+    }
   };
 
   const handleClickShowPassword = () => {
@@ -46,8 +72,26 @@ const LoginForm = () => {
 
   // Demo credentials helper
   const fillDemoCredentials = () => {
-    setUsername('user');
-    setPassword('password');
+    setUsername('demo_user');
+    setPassword('password123');
+    clearMessages();
+  };
+
+  // Clear error when user starts typing
+  const handleUsernameChange = (e) => {
+    setUsername(e.target.value);
+    if (formErrors.username) {
+      setFormErrors(prev => ({ ...prev, username: '' }));
+    }
+    if (error) clearMessages();
+  };
+
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+    if (formErrors.password) {
+      setFormErrors(prev => ({ ...prev, password: '' }));
+    }
+    if (error) clearMessages();
   };
 
   return (
@@ -57,18 +101,30 @@ const LoginForm = () => {
         p: 4,
         maxWidth: 400,
         mx: 'auto',
-        mt: 8,
+        mt: 2,
         borderRadius: 2
       }}
     >
       <Typography variant="h5" component="h1" align="center" gutterBottom>
-        Movie Explorer Login
+        Welcome Back
       </Typography>
       
       <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 3 }}>
         Sign in to access your movie collection
       </Typography>
       
+      {/* Success Message */}
+      <Collapse in={showSuccess}>
+        <Alert 
+          severity="success" 
+          sx={{ mb: 2 }}
+          icon={<CheckCircle />}
+        >
+          {successMessage}
+        </Alert>
+      </Collapse>
+
+      {/* Error Message */}
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}
@@ -86,7 +142,7 @@ const LoginForm = () => {
           autoComplete="username"
           autoFocus
           value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          onChange={handleUsernameChange}
           error={!!formErrors.username}
           helperText={formErrors.username}
           disabled={loading}
@@ -102,7 +158,7 @@ const LoginForm = () => {
           id="password"
           autoComplete="current-password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={handlePasswordChange}
           error={!!formErrors.password}
           helperText={formErrors.password}
           disabled={loading}
@@ -113,6 +169,7 @@ const LoginForm = () => {
                   aria-label="toggle password visibility"
                   onClick={handleClickShowPassword}
                   edge="end"
+                  disabled={loading}
                 >
                   {showPassword ? <VisibilityOff /> : <Visibility />}
                 </IconButton>
@@ -141,8 +198,24 @@ const LoginForm = () => {
           Use Demo Credentials
         </Button>
         
-        <Typography variant="body2" color="text.secondary" align="center">
-          For demo purposes, use: username "user" and password "password"
+        {onSwitchToRegister && (
+          <Box sx={{ textAlign: 'center', mt: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              Don't have an account?{' '}
+              <Button
+                variant="text"
+                onClick={onSwitchToRegister}
+                disabled={loading}
+                sx={{ textTransform: 'none' }}
+              >
+                Sign Up
+              </Button>
+            </Typography>
+          </Box>
+        )}
+        
+        <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 2 }}>
+          For demo purposes, use: username "demo_user" and password "password123"
         </Typography>
       </Box>
     </Paper>
