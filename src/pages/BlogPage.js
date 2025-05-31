@@ -15,7 +15,8 @@ import {
   MenuItem,
   IconButton,
   InputBase,
-  alpha
+  alpha,
+  useTheme  // Add this import
 } from '@mui/material';
 import {
   Article,
@@ -34,6 +35,7 @@ import CreateBlogDialog from '../components/blog/CreateBlogDialog';
 const BlogPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const theme = useTheme(); // Add this line
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -291,7 +293,7 @@ const BlogPage = () => {
           sx={{
             p: 6,
             textAlign: 'center',
-            bgcolor: alpha(theme => theme.palette.primary.main, 0.05)
+            bgcolor: alpha(theme.palette.primary.main, 0.05) // FIXED: Use theme directly
           }}
         >
           <Article sx={{ fontSize: 60, color: 'text.secondary', mb: 2 }} />

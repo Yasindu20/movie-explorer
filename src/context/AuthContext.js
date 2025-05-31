@@ -8,6 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(null);
 
   // Check if user is already logged in
   useEffect(() => {
@@ -32,9 +33,14 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   };
 
+  const clearMessages = () => {
+    setError(null);
+    setSuccessMessage(null);
+  };
+
   const register = async (userData) => {
     setLoading(true);
-    setError(null);
+    clearMessages();
     
     try {
       const response = await authApi.register(userData);
@@ -44,11 +50,12 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('user', JSON.stringify(response.user));
         setUser(response.user);
         setIsAuthenticated(true);
+        setSuccessMessage(`Welcome to Movie Explorer, ${response.user.name}! Your account has been created successfully.`);
         setLoading(false);
-        return { success: true };
+        return { success: true, message: 'Account created successfully!' };
       }
     } catch (error) {
-      const errorMessage = error.response?.data?.error || 'Registration failed';
+      const errorMessage = error.response?.data?.error || 'Registration failed. Please try again.';
       setError(errorMessage);
       setLoading(false);
       return { success: false, error: errorMessage };
@@ -57,7 +64,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     setLoading(true);
-    setError(null);
+    clearMessages();
     
     try {
       const response = await authApi.login({ username, password });
@@ -67,11 +74,12 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('user', JSON.stringify(response.user));
         setUser(response.user);
         setIsAuthenticated(true);
+        setSuccessMessage(`Welcome back, ${response.user.name}!`);
         setLoading(false);
-        return { success: true };
+        return { success: true, message: 'Login successful!' };
       }
     } catch (error) {
-      const errorMessage = error.response?.data?.error || 'Invalid credentials';
+      const errorMessage = error.response?.data?.error || 'Invalid username or password. Please try again.';
       setError(errorMessage);
       setLoading(false);
       return { success: false, error: errorMessage };
@@ -83,6 +91,7 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
+    clearMessages();
   };
 
   const updateProfile = async (userData) => {
@@ -92,10 +101,12 @@ export const AuthProvider = ({ children }) => {
       if (response.success) {
         setUser(response.data);
         localStorage.setItem('user', JSON.stringify(response.data));
+        setSuccessMessage('Profile updated successfully!');
         return { success: true, data: response.data };
       }
     } catch (error) {
       const errorMessage = error.response?.data?.error || 'Update failed';
+      setError(errorMessage);
       return { success: false, error: errorMessage };
     }
   };
@@ -110,8 +121,10 @@ export const AuthProvider = ({ children }) => {
         updateProfile,
         checkAuth,
         error,
+        successMessage,
         loading,
-        isAuthenticated
+        isAuthenticated,
+        clearMessages
       }}
     >
       {children}

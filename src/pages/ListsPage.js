@@ -20,7 +20,8 @@ import {
   CardActionArea,
   Avatar,
   AvatarGroup,
-  Tooltip
+  Tooltip,
+  useTheme  // Add this import
 } from '@mui/material';
 import {
   List as ListIcon,
@@ -45,6 +46,7 @@ import ListCard from '../components/lists/ListCard';
 const ListsPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
+  const theme = useTheme(); // Add this line
   const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -273,7 +275,7 @@ const ListsPage = () => {
           sx={{
             p: 6,
             textAlign: 'center',
-            bgcolor: alpha(theme => theme.palette.primary.main, 0.05)
+            bgcolor: alpha(theme.palette.primary.main, 0.05) // FIXED: Use theme directly
           }}
         >
           <ListIcon sx={{ fontSize: 60, color: 'text.secondary', mb: 2 }} />
