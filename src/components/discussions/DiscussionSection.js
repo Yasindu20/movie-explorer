@@ -27,6 +27,23 @@ import { discussionApi } from '../../api/discussionApi';
 import DiscussionList from './DiscussionList';
 import CreateDiscussionDialog from './CreateDiscussionDialog';
 
+// Move categories outside component to prevent recreation on every render
+const categories = [
+  { value: 'all', label: 'All Discussions', icon: <Forum /> },
+  { value: 'general', label: 'General', icon: <QuestionAnswer /> },
+  { value: 'review', label: 'Reviews', icon: <RateReview /> },
+  { value: 'theory', label: 'Theories', icon: <Psychology /> },
+  { value: 'spoiler', label: 'Spoilers', icon: <Warning />, color: 'error' }
+];
+
+const sortOptions = [
+  { value: '-createdAt', label: 'Newest First' },
+  { value: 'createdAt', label: 'Oldest First' },
+  { value: '-likes', label: 'Most Liked' },
+  { value: '-views', label: 'Most Viewed' },
+  { value: '-comments', label: 'Most Discussed' }
+];
+
 const DiscussionSection = ({ movieId, movieTitle, moviePoster }) => {
   const { isAuthenticated } = useAuth();
   const [discussions, setDiscussions] = useState([]);
@@ -38,26 +55,6 @@ const DiscussionSection = ({ movieId, movieTitle, moviePoster }) => {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-
-  const categories = [
-    { value: 'all', label: 'All Discussions', icon: <Forum /> },
-    { value: 'general', label: 'General', icon: <QuestionAnswer /> },
-    { value: 'review', label: 'Reviews', icon: <RateReview /> },
-    { value: 'theory', label: 'Theories', icon: <Psychology /> },
-    { value: 'spoiler', label: 'Spoilers', icon: <Warning />, color: 'error' }
-  ];
-
-  const sortOptions = [
-    { value: '-createdAt', label: 'Newest First' },
-    { value: 'createdAt', label: 'Oldest First' },
-    { value: '-likes', label: 'Most Liked' },
-    { value: '-views', label: 'Most Viewed' },
-    { value: '-comments', label: 'Most Discussed' }
-  ];
-
-  useEffect(() => {
-    loadDiscussions();
-  }, [movieId, activeTab, sortBy, page]);
 
   const loadDiscussions = useCallback(async () => {
     setLoading(true);
@@ -86,8 +83,9 @@ const DiscussionSection = ({ movieId, movieTitle, moviePoster }) => {
     } finally {
       setLoading(false);
     }
-  }, [movieId, activeTab, sortBy, page]); // Add dependencies here
+  }, [movieId, activeTab, sortBy, page]); // Remove categories from dependencies since it's now stable
 
+  // Keep only one useEffect that depends on loadDiscussions
   useEffect(() => {
     loadDiscussions();
   }, [loadDiscussions]);
