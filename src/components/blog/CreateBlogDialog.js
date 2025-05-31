@@ -46,6 +46,7 @@ const CreateBlogDialog = ({ open, onClose, onSuccess }) => {
     status: 'draft',
     featuredImage: ''
   });
+  const [movieSearch, setMovieSearch] = useState(''); // ADD THIS LINE
   const [movieOptions, setMovieOptions] = useState([]);
   const [searchingMovies, setSearchingMovies] = useState(false);
   const [tagInput, setTagInput] = useState('');
@@ -106,6 +107,10 @@ const CreateBlogDialog = ({ open, onClose, onSuccess }) => {
         moviePoster: movie.poster_path
       }]
     }));
+    
+    // Clear the search input after adding a movie
+    setMovieSearch('');
+    setMovieOptions([]);
   };
 
   const handleRemoveMovie = (movieId) => {
@@ -295,6 +300,8 @@ const CreateBlogDialog = ({ open, onClose, onSuccess }) => {
               options={movieOptions}
               getOptionLabel={(option) => `${option.title} (${option.release_date?.split('-')[0] || 'N/A'})`}
               loading={searchingMovies}
+              value={null} // Always show empty value after selection
+              inputValue={movieSearch} // Control the input value
               onInputChange={(event, value) => {
                 setMovieSearch(value);
                 if (value) handleMovieSearch(value);
