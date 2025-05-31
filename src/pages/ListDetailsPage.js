@@ -27,14 +27,10 @@ import {
 import {
   ArrowBack,
   Add,
-  Edit,
-  Delete,
   Public,
   Lock,
   Group,
   Share,
-  Favorite,
-  FavoriteBorder,
   Star,
   Remove,
   PersonAdd

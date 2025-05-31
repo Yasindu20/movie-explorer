@@ -9,7 +9,6 @@ import {
   Avatar,
   Button,
   Divider,
-  IconButton,
   TextField,
   Alert,
   CircularProgress,
@@ -24,8 +23,6 @@ import {
   ThumbUpOutlined,
   Comment,
   Share,
-  BookmarkBorder,
-  Bookmark,
   CalendarToday,
   Visibility,
   Send

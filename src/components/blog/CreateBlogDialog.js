@@ -29,9 +29,7 @@ import {
   Movie,
   Image,
   Send,
-  Save,
-  Visibility,
-  VisibilityOff
+  Save
 } from '@mui/icons-material';
 import { blogApi } from '../../api/blogApi';
 import { searchMovies } from '../../api/tmdbApi';

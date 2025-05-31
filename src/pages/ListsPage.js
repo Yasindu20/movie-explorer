@@ -6,7 +6,6 @@ import {
   Box,
   Button,
   Paper,
-  Chip,
   CircularProgress,
   Alert,
   ToggleButton,
@@ -17,11 +16,7 @@ import {
   Card,
   CardMedia,
   CardContent,
-  CardActionArea,
-  Avatar,
-  AvatarGroup,
-  Tooltip,
-  useTheme  // Add this import
+  useTheme 
 } from '@mui/material';
 import {
   List as ListIcon,

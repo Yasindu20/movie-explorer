@@ -11,20 +11,16 @@ import {
   Alert,
   IconButton,
   Menu,
-  MenuItem,
-  Badge
+  MenuItem
 } from '@mui/material';
 import {
   Add,
   Forum,
-  FilterList,
   Sort,
-  TrendingUp,
   QuestionAnswer,
   RateReview,
   Psychology,
-  Warning,
-  PushPin
+  Warning
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { discussionApi } from '../../api/discussionApi';

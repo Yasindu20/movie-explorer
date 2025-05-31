@@ -8,7 +8,6 @@ import {
   Box,
   Chip,
   Avatar,
-  IconButton,
   alpha
 } from '@mui/material';
 import {

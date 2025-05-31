@@ -9,7 +9,6 @@ import {
   Chip,
   Avatar,
   AvatarGroup,
-  IconButton,
   Tooltip,
   alpha
 } from '@mui/material';
