@@ -44,10 +44,6 @@ const BlogDetailsPage = () => {
   const [comment, setComment] = useState('');
   const [commenting, setCommenting] = useState(false);
 
-  useEffect(() => {
-    loadBlog();
-  }, [slug]);
-
   const loadBlog = useCallback(async () => {
     try {
       setLoading(true);
@@ -66,6 +62,7 @@ const BlogDetailsPage = () => {
     }
   }, [slug, user?.id]);
 
+  // Remove the first useEffect and keep only this one
   useEffect(() => {
     loadBlog();
   }, [loadBlog]);

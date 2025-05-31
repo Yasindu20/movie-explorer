@@ -16,7 +16,7 @@ import {
   IconButton,
   InputBase,
   alpha,
-  useTheme  // Add this import
+  useTheme
 } from '@mui/material';
 import {
   Article,
@@ -35,7 +35,7 @@ import CreateBlogDialog from '../components/blog/CreateBlogDialog';
 const BlogPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const theme = useTheme(); // Add this line
+  const theme = useTheme();
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -58,15 +58,6 @@ const BlogPage = () => {
     { value: 'opinion', label: 'Opinion' },
     { value: 'interview', label: 'Interviews' }
   ];
-
-  useEffect(() => {
-    loadBlogs();
-  }, [filters, page]);
-
-  useEffect(() => {
-    // Load trending tags
-    loadTrendingTags();
-  }, []);
 
   const loadBlogs = useCallback(async () => {
     setLoading(true);
@@ -98,9 +89,15 @@ const BlogPage = () => {
     }
   }, [filters.category, filters.tag, page]);
 
+  // Remove the first useEffect and keep only this one
   useEffect(() => {
     loadBlogs();
   }, [loadBlogs]);
+
+  useEffect(() => {
+    // Load trending tags
+    loadTrendingTags();
+  }, []);
 
   const loadTrendingTags = async () => {
     // Mock trending tags - in real app, this would be an API call
@@ -297,7 +294,7 @@ const BlogPage = () => {
           sx={{
             p: 6,
             textAlign: 'center',
-            bgcolor: alpha(theme.palette.primary.main, 0.05) // FIXED: Use theme directly
+            bgcolor: alpha(theme.palette.primary.main, 0.05)
           }}
         >
           <Article sx={{ fontSize: 60, color: 'text.secondary', mb: 2 }} />
