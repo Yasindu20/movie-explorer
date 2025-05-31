@@ -41,7 +41,7 @@ import ListCard from '../components/lists/ListCard';
 const ListsPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const theme = useTheme(); // Add this line
+  const theme = useTheme();
   const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -60,10 +60,6 @@ const ListsPage = () => {
     { value: 'themed', label: 'Themed', icon: <Category /> },
     { value: 'collaborative', label: 'Collaborative', icon: <Group /> }
   ];
-
-  useEffect(() => {
-    loadLists();
-  }, [filter, page]);
 
   const loadLists = useCallback(async () => {
     setLoading(true);
@@ -104,6 +100,7 @@ const ListsPage = () => {
     }
   }, [filter, page]);
 
+  // Remove the first useEffect and keep only this one
   useEffect(() => {
     loadLists();
   }, [loadLists]);
@@ -274,7 +271,7 @@ const ListsPage = () => {
           sx={{
             p: 6,
             textAlign: 'center',
-            bgcolor: alpha(theme.palette.primary.main, 0.05) // FIXED: Use theme directly
+            bgcolor: alpha(theme.palette.primary.main, 0.05)
           }}
         >
           <ListIcon sx={{ fontSize: 60, color: 'text.secondary', mb: 2 }} />
