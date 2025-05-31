@@ -21,8 +21,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
-  useTheme
+  TextField
+  // Remove useTheme since it's not used
 } from '@mui/material';
 import {
   ArrowBack,
@@ -54,10 +54,6 @@ const ListDetailsPage = () => {
   const [movieSearchResults, setMovieSearchResults] = useState([]);
   const [searchingMovies, setSearchingMovies] = useState(false);
 
-  useEffect(() => {
-    loadList();
-  }, [id]);
-
   const loadList = useCallback(async () => {
     try {
       setLoading(true);
@@ -75,6 +71,7 @@ const ListDetailsPage = () => {
     }
   }, [id, user?.id]);
 
+  // Remove the first useEffect and keep only this one
   useEffect(() => {
     loadList();
   }, [loadList]);
