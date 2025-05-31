@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -43,9 +43,8 @@ import { formatDistanceToNow } from 'date-fns';
 const ListDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const theme = useTheme();
   const { user } = useAuth();
-  
+
   const [list, setList] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -59,11 +58,11 @@ const ListDetailsPage = () => {
     loadList();
   }, [id]);
 
-  const loadList = async () => {
+  const loadList = useCallback(async () => {
     try {
       setLoading(true);
       const response = await listApi.getList(id);
-      
+
       if (response.success) {
         setList(response.data);
         setFollowing(response.data.followers.includes(user?.id));
@@ -74,12 +73,16 @@ const ListDetailsPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, user?.id]);
+
+  useEffect(() => {
+    loadList();
+  }, [loadList]);
 
   const handleFollow = async () => {
     try {
       const response = await listApi.toggleFollowList(id);
-      
+
       if (response.success) {
         setFollowing(response.data.isFollowing);
         setList(prev => ({
@@ -122,7 +125,7 @@ const ListDetailsPage = () => {
       };
 
       const response = await listApi.addMovieToList(id, movieData);
-      
+
       if (response.success) {
         setList(response.data);
         setAddMovieDialogOpen(false);
@@ -137,7 +140,7 @@ const ListDetailsPage = () => {
   const handleRemoveMovie = async (movieId) => {
     try {
       const response = await listApi.removeMovieFromList(id, movieId);
-      
+
       if (response.success) {
         setList(response.data);
       }
@@ -361,7 +364,7 @@ const ListDetailsPage = () => {
                     <Typography variant="h6" noWrap gutterBottom>
                       {movie.movieTitle}
                     </Typography>
-                    
+
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                       {movie.movieRating && (
                         <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>

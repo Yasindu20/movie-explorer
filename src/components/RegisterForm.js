@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  TextField, 
-  Button, 
-  Typography, 
-  Paper, 
-  Alert, 
-  InputAdornment, 
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  Paper,
+  Alert,
+  InputAdornment,
   IconButton,
   CircularProgress,
   Collapse,
@@ -57,12 +57,12 @@ const RegisterForm = ({ onSwitchToLogin }) => {
   useEffect(() => {
     const password = formData.password;
     let strength = 0;
-    
+
     if (password.length >= 6) strength += 25;
     if (password.length >= 8) strength += 25;
     if (/[A-Z]/.test(password)) strength += 25;
     if (/[0-9]/.test(password)) strength += 25;
-    
+
     setPasswordStrength(strength);
   }, [formData.password]);
 
@@ -72,7 +72,7 @@ const RegisterForm = ({ onSwitchToLogin }) => {
       ...prev,
       [name]: value
     }));
-    
+
     // Clear error when user starts typing
     if (formErrors[name]) {
       setFormErrors(prev => ({
@@ -99,14 +99,14 @@ const RegisterForm = ({ onSwitchToLogin }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Basic validation
     const errors = {};
     if (!formData.username.trim()) errors.username = 'Username is required';
     if (!formData.email.trim()) errors.email = 'Email is required';
     if (!formData.password) errors.password = 'Password is required';
     if (!formData.name.trim()) errors.name = 'Full name is required';
-    
+
     // Username validation
     if (formData.username && formData.username.length < 3) {
       errors.username = 'Username must be at least 3 characters';
@@ -114,29 +114,30 @@ const RegisterForm = ({ onSwitchToLogin }) => {
     if (formData.username && !/^[a-zA-Z0-9_]+$/.test(formData.username)) {
       errors.username = 'Username can only contain letters, numbers, and underscores';
     }
-    
+
     // Email validation
-    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    // eslint-disable-next-line no-useless-escape
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (formData.email && !emailRegex.test(formData.email)) {
       errors.email = 'Please enter a valid email address';
     }
-    
+
     // Password validation
     if (formData.password && formData.password.length < 6) {
       errors.password = 'Password must be at least 6 characters';
     }
-    
+
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       return;
     }
-    
+
     // Clear any previous errors
     setFormErrors({});
-    
+
     // Attempt registration
     const result = await register(formData);
-    
+
     if (!result.success) {
       // Scroll to top to show error
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -162,15 +163,15 @@ const RegisterForm = ({ onSwitchToLogin }) => {
         <AccountCircle sx={{ mr: 1, verticalAlign: 'middle' }} />
         Create Account
       </Typography>
-      
+
       <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 3 }}>
         Join Movie Explorer to start your journey
       </Typography>
-      
+
       {/* Success Message */}
       <Collapse in={showSuccess}>
-        <Alert 
-          severity="success" 
+        <Alert
+          severity="success"
           sx={{ mb: 2 }}
           icon={<CheckCircle />}
         >
@@ -184,7 +185,7 @@ const RegisterForm = ({ onSwitchToLogin }) => {
           {error}
         </Alert>
       )}
-      
+
       <Box component="form" onSubmit={handleSubmit} noValidate>
         <TextField
           margin="normal"
@@ -231,7 +232,7 @@ const RegisterForm = ({ onSwitchToLogin }) => {
           helperText={formErrors.email}
           disabled={loading}
         />
-        
+
         <TextField
           margin="normal"
           required
@@ -273,15 +274,15 @@ const RegisterForm = ({ onSwitchToLogin }) => {
                 {getPasswordStrengthText()}
               </Typography>
             </Box>
-            <LinearProgress 
-              variant="determinate" 
-              value={passwordStrength} 
+            <LinearProgress
+              variant="determinate"
+              value={passwordStrength}
               color={getPasswordStrengthColor()}
               sx={{ height: 6, borderRadius: 3 }}
             />
           </Box>
         )}
-        
+
         <Button
           type="submit"
           fullWidth
@@ -291,7 +292,7 @@ const RegisterForm = ({ onSwitchToLogin }) => {
         >
           {loading ? <CircularProgress size={24} /> : 'Create Account'}
         </Button>
-        
+
         <Box sx={{ textAlign: 'center' }}>
           <Typography variant="body2" color="text.secondary">
             Already have an account?{' '}

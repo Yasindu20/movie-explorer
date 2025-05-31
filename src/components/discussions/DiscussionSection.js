@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -59,7 +59,7 @@ const DiscussionSection = ({ movieId, movieTitle, moviePoster }) => {
     loadDiscussions();
   }, [movieId, activeTab, sortBy, page]);
 
-  const loadDiscussions = async () => {
+  const loadDiscussions = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -86,7 +86,11 @@ const DiscussionSection = ({ movieId, movieTitle, moviePoster }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [movieId, activeTab, sortBy, page]); // Add dependencies here
+
+  useEffect(() => {
+    loadDiscussions();
+  }, [loadDiscussions]);
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);

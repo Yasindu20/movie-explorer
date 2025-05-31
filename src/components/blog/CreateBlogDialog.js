@@ -46,7 +46,6 @@ const CreateBlogDialog = ({ open, onClose, onSuccess }) => {
     status: 'draft',
     featuredImage: ''
   });
-  const [movieSearch, setMovieSearch] = useState('');
   const [movieOptions, setMovieOptions] = useState([]);
   const [searchingMovies, setSearchingMovies] = useState(false);
   const [tagInput, setTagInput] = useState('');

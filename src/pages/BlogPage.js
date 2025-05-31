@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Grid,
@@ -68,7 +68,7 @@ const BlogPage = () => {
     loadTrendingTags();
   }, []);
 
-  const loadBlogs = async () => {
+  const loadBlogs = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -96,7 +96,11 @@ const BlogPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters.category, filters.tag, page]);
+
+  useEffect(() => {
+    loadBlogs();
+  }, [loadBlogs]);
 
   const loadTrendingTags = async () => {
     // Mock trending tags - in real app, this would be an API call

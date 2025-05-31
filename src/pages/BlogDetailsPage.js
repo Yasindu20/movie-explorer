@@ -14,8 +14,7 @@ import {
   CircularProgress,
   Card,
   CardMedia,
-  Grid,
-  useTheme
+  Grid
 } from '@mui/material';
 import {
   ArrowBack,
@@ -35,9 +34,8 @@ import { getImageUrl } from '../api/tmdbApi';
 const BlogDetailsPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const theme = useTheme();
   const { user } = useAuth();
-  
+
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -50,11 +48,11 @@ const BlogDetailsPage = () => {
     loadBlog();
   }, [slug]);
 
-  const loadBlog = async () => {
+  const loadBlog = useCallback(async () => {
     try {
       setLoading(true);
       const response = await blogApi.getBlog(slug);
-      
+
       if (response.success) {
         setBlog(response.data);
         setLiked(response.data.likes.includes(user?.id));
@@ -66,12 +64,16 @@ const BlogDetailsPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [slug, user?.id]);
+
+  useEffect(() => {
+    loadBlog();
+  }, [loadBlog]);
 
   const handleLike = async () => {
     try {
       const response = await blogApi.toggleLike(blog._id);
-      
+
       if (response.success) {
         setLiked(response.data.isLiked);
         setLikeCount(response.data.likes);
@@ -83,13 +85,13 @@ const BlogDetailsPage = () => {
 
   const handleComment = async (e) => {
     e.preventDefault();
-    
+
     if (!comment.trim()) return;
 
     try {
       setCommenting(true);
       const response = await blogApi.addComment(blog._id, comment);
-      
+
       if (response.success) {
         setBlog(response.data);
         setComment('');
@@ -224,7 +226,7 @@ const BlogDetailsPage = () => {
             >
               {likeCount} Likes
             </Button>
-            
+
             <Button
               startIcon={<Comment />}
               variant="outlined"
@@ -232,7 +234,7 @@ const BlogDetailsPage = () => {
             >
               {blog.comments.length} Comments
             </Button>
-            
+
             <Button
               startIcon={<Share />}
               onClick={handleShare}
@@ -240,7 +242,7 @@ const BlogDetailsPage = () => {
             >
               Share
             </Button>
-            
+
             <Box sx={{ display: 'flex', alignItems: 'center', ml: 'auto' }}>
               <Visibility sx={{ fontSize: 16, mr: 0.5, color: 'text.secondary' }} />
               <Typography variant="caption" color="text.secondary">

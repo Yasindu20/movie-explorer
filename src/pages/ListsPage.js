@@ -16,7 +16,7 @@ import {
   Card,
   CardMedia,
   CardContent,
-  useTheme 
+  useTheme
 } from '@mui/material';
 import {
   List as ListIcon,
@@ -40,7 +40,7 @@ import ListCard from '../components/lists/ListCard';
 
 const ListsPage = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const theme = useTheme(); // Add this line
   const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -65,7 +65,7 @@ const ListsPage = () => {
     loadLists();
   }, [filter, page]);
 
-  const loadLists = async () => {
+  const loadLists = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -102,7 +102,11 @@ const ListsPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter, page]);
+
+  useEffect(() => {
+    loadLists();
+  }, [loadLists]);
 
   const handleFilterChange = (event, newFilter) => {
     if (newFilter !== null) {
