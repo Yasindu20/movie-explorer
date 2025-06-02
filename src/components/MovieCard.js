@@ -19,13 +19,15 @@ import {
   Star, 
   ExpandMore, 
   ExpandLess,
-  PlayCircleOutline
+  PlayCircleOutline,
+  PlayArrow
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { getImageUrl } from '../api/tmdbApi';
 import { useMovieContext } from '../context/MovieContext';
 import { useRecommendation } from '../context/RecommendationContext';
 import RatingSystem from './RatingSystem';
+import StreamingIndicator from './StreamingIndicator';
 
 const MovieCard = ({ movie }) => {
   const navigate = useNavigate();
@@ -115,9 +117,18 @@ const MovieCard = ({ movie }) => {
           <Typography gutterBottom variant="h6" component="div" noWrap>
             {movie.title}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
             {formatReleaseDate(movie.release_date)}
           </Typography>
+          
+          {/* Streaming Availability Indicator */}
+          <Box sx={{ mt: 1 }}>
+            <StreamingIndicator 
+              movie={movie} 
+              variant="compact" 
+              showQuickAccess={true}
+            />
+          </Box>
         </CardContent>
       </CardActionArea>
       
