@@ -32,6 +32,7 @@ import {
 } from '@mui/icons-material';
 import { fetchMovieDetails, getImageUrl } from '../api/tmdbApi';
 import { useMovieContext } from '../context/MovieContext';
+import WhereToWatch from '../components/WhereToWatch';
 import YouTube from 'react-youtube';
 
 const MovieDetailsPage = () => {
@@ -518,6 +519,11 @@ const MovieDetailsPage = () => {
 
       {/* Movie Details Content */}
       <Container maxWidth="xl" sx={{ py: { xs: 4, sm: 6 } }}>
+        {/* Where to Watch Section - Full Width */}
+        <Box sx={{ mb: 4 }}>
+          <WhereToWatch movie={movie} />
+        </Box>
+
         <Grid container spacing={4}>
           {/* Left Column - Available only on mobile */}
           {isMobile && (
