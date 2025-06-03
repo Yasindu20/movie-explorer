@@ -1,4 +1,3 @@
-// src/components/AIReviewBot.js - True Conversational AI Bot
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
@@ -18,7 +17,10 @@ import {
   Slide,
   Fade,
   useTheme,
-  alpha
+  alpha,
+  Snackbar,
+  Alert,
+  Tooltip
 } from '@mui/material';
 import {
   SmartToy,
@@ -28,7 +30,9 @@ import {
   Movie,
   ThumbUp,
   ThumbDown,
-  Refresh
+  Refresh,
+  CheckCircle,
+  Psychology
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
@@ -44,6 +48,7 @@ const AIReviewBot = ({ open, onClose, movie, onReviewGenerated }) => {
   const [isTyping, setIsTyping] = useState(false);
   const [currentStep, setCurrentStep] = useState('intro');
   const [botPersonality, setBotPersonality] = useState('friendly'); // friendly, professional, casual
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   
   // Review data collection
   const [reviewData, setReviewData] = useState({
@@ -116,6 +121,7 @@ const AIReviewBot = ({ open, onClose, movie, onReviewGenerated }) => {
   const initializeBot = () => {
     setMessages([]);
     setCurrentStep('intro');
+    setShowSuccessMessage(false);
     setReviewData({
       title: '',
       content: '',
@@ -393,7 +399,8 @@ Overall Rating: ${reviewData.overallRating}/10
       title: `My thoughts on ${movie.title}`,
       content: reviewText,
       rating: reviewData.overallRating,
-      tags: await generateSmartTags(reviewText)
+      tags: await generateSmartTags(reviewText),
+      aiAssisted: true
     };
 
     return generatedReview;
@@ -419,6 +426,14 @@ Overall Rating: ${reviewData.overallRating}/10
 
   const handleRatingClick = (rating) => {
     handleUserResponse(rating.toString());
+  };
+
+  const handleUseReview = (review) => {
+    onReviewGenerated(review);
+    setShowSuccessMessage(true);
+    setTimeout(() => {
+      onClose();
+    }, 2000);
   };
 
   const renderMessage = (message) => {
@@ -457,7 +472,14 @@ Overall Rating: ${reviewData.overallRating}/10
                       size="small"
                       variant="outlined"
                       onClick={() => handleRatingClick(rating)}
-                      sx={{ minWidth: 40 }}
+                      sx={{ 
+                        minWidth: 40,
+                        borderRadius: '20px',
+                        '&:hover': {
+                          transform: 'scale(1.1)',
+                          boxShadow: 2
+                        }
+                      }}
                     >
                       {rating}
                     </Button>
@@ -471,41 +493,70 @@ Overall Rating: ${reviewData.overallRating}/10
                   elevation={3} 
                   sx={{ 
                     mt: 2, 
-                    p: 2, 
+                    p: 3, 
                     bgcolor: 'background.paper',
-                    border: `2px solid ${theme.palette.primary.main}`
+                    border: `2px solid ${theme.palette.primary.main}`,
+                    borderRadius: 3
                   }}
                 >
-                  <Typography variant="h6" gutterBottom>
-                    📝 Your Generated Review:
-                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <CheckCircle color="success" sx={{ mr: 1 }} />
+                    <Typography variant="h6" fontWeight="bold">
+                      📝 Your AI-Generated Review:
+                    </Typography>
+                  </Box>
+                  
                   <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
                     {message.options.review.title}
                   </Typography>
-                  <Rating 
-                    value={message.options.review.rating} 
-                    readOnly 
-                    max={10}
-                    sx={{ mb: 1 }}
-                  />
-                  <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', mb: 2 }}>
+                  
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <Rating 
+                      value={message.options.review.rating} 
+                      readOnly 
+                      max={10}
+                      sx={{ mr: 2 }}
+                    />
+                    <Chip
+                      icon={<AutoAwesome />}
+                      label="AI Assisted"
+                      size="small"
+                      color="primary"
+                    />
+                  </Box>
+                  
+                  <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', mb: 2, lineHeight: 1.6 }}>
                     {message.options.review.content}
                   </Typography>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                  
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 3 }}>
                     {message.options.review.tags.map((tag, index) => (
-                      <Chip key={index} label={tag} size="small" />
+                      <Chip key={index} label={tag} size="small" variant="outlined" />
                     ))}
                   </Box>
-                  <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
+                  
+                  <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                     <Button 
                       variant="contained" 
-                      onClick={() => onReviewGenerated(message.options.review)}
+                      startIcon={<CheckCircle />}
+                      onClick={() => handleUseReview(message.options.review)}
+                      sx={{ 
+                        borderRadius: 3,
+                        px: 3,
+                        boxShadow: 3,
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: 6
+                        }
+                      }}
                     >
                       Use This Review
                     </Button>
                     <Button 
                       variant="outlined"
+                      startIcon={<Psychology />}
                       onClick={() => handleUserResponse("Let's refine this")}
+                      sx={{ borderRadius: 3, px: 3 }}
                     >
                       Make Changes
                     </Button>
@@ -557,120 +608,178 @@ Overall Rating: ${reviewData.overallRating}/10
       >
         <CircularProgress size={16} sx={{ mr: 1 }} />
         <Typography variant="body2" color="text.secondary">
-          Rex is typing...
+          Rex is thinking...
         </Typography>
       </Paper>
     </Box>
   );
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-      fullScreen={theme.breakpoints.down('sm')}
-      TransitionComponent={Slide}
-      TransitionProps={{ direction: 'up' }}
-      PaperProps={{
-        sx: {
-          height: { xs: '100%', sm: '80vh' },
-          maxHeight: { xs: '100%', sm: '600px' }
-        }
-      }}
-    >
-      <DialogTitle sx={{ 
-        borderBottom: 1,
-        borderColor: 'divider',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between'
-      }}>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <SmartToy sx={{ mr: 1, color: 'primary.main' }} />
-          <Box>
-            <Typography variant="h6">
-              AI Review Bot
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Let's chat about {movie?.title}
-            </Typography>
-          </Box>
-        </Box>
-        <Box>
-          <IconButton onClick={() => setBotPersonality(
-            botPersonality === 'friendly' ? 'professional' : 
-            botPersonality === 'professional' ? 'casual' : 'friendly'
-          )}>
-            <AutoAwesome />
-          </IconButton>
-          <IconButton onClick={onClose}>
-            <Close />
-          </IconButton>
-        </Box>
-      </DialogTitle>
-
-      <DialogContent sx={{ p: 0, display: 'flex', flexDirection: 'column' }}>
-        {/* Messages Area */}
-        <Box sx={{ 
-          flexGrow: 1, 
-          p: 2, 
-          overflowY: 'auto',
-          maxHeight: '400px'
+    <>
+      <Dialog
+        open={open}
+        onClose={onClose}
+        maxWidth="sm"
+        fullWidth
+        fullScreen={theme.breakpoints.down('sm')}
+        TransitionComponent={Slide}
+        TransitionProps={{ direction: 'up' }}
+        PaperProps={{
+          sx: {
+            height: { xs: '100%', sm: '85vh' },
+            maxHeight: { xs: '100%', sm: '700px' },
+            borderRadius: { xs: 0, sm: 3 }
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          borderBottom: 1,
+          borderColor: 'divider',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          background: theme.palette.mode === 'dark'
+            ? 'linear-gradient(135deg, #1a237e 0%, #3f51b5 100%)'
+            : 'linear-gradient(135deg, #3f51b5 0%, #2196f3 100%)',
+          color: 'white'
         }}>
-          {messages.map(renderMessage)}
-          {isTyping && renderTypingIndicator()}
-          <div ref={messagesEndRef} />
-        </Box>
-
-        {/* Input Area */}
-        <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <TextField
-              fullWidth
-              variant="outlined"
-              placeholder="Type your response..."
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleUserResponse(userInput);
-                }
-              }}
-              multiline
-              maxRows={3}
-              disabled={isTyping}
-            />
-            <IconButton 
-              color="primary" 
-              onClick={() => handleUserResponse(userInput)}
-              disabled={!userInput.trim() || isTyping}
-            >
-              <Send />
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <SmartToy sx={{ mr: 1, fontSize: '1.5rem' }} />
+            <Box>
+              <Typography variant="h6" fontWeight="bold">
+                AI Review Assistant
+              </Typography>
+              <Typography variant="caption" sx={{ opacity: 0.9 }}>
+                Let's chat about {movie?.title}
+              </Typography>
+            </Box>
+          </Box>
+          <Box>
+            <Tooltip title="Change personality">
+              <IconButton 
+                onClick={() => setBotPersonality(
+                  botPersonality === 'friendly' ? 'professional' : 
+                  botPersonality === 'professional' ? 'casual' : 'friendly'
+                )}
+                sx={{ color: 'rgba(255,255,255,0.8)' }}
+              >
+                <AutoAwesome />
+              </IconButton>
+            </Tooltip>
+            <IconButton onClick={onClose} sx={{ color: 'rgba(255,255,255,0.8)' }}>
+              <Close />
             </IconButton>
           </Box>
-          
-          {/* Quick Response Suggestions */}
-          {currentStep === 'intro' && (
-            <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              <Chip 
-                label="Yes, let's start!" 
-                onClick={() => handleQuickResponse("Yes, let's start!")}
-                clickable
-                size="small"
+        </DialogTitle>
+
+        <DialogContent sx={{ p: 0, display: 'flex', flexDirection: 'column' }}>
+          {/* Messages Area */}
+          <Box sx={{ 
+            flexGrow: 1, 
+            p: 2, 
+            overflowY: 'auto',
+            maxHeight: '500px',
+            '&::-webkit-scrollbar': {
+              width: '8px',
+            },
+            '&::-webkit-scrollbar-track': {
+              backgroundColor: 'rgba(0,0,0,0.05)',
+              borderRadius: '4px',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: 'rgba(0,0,0,0.2)',
+              borderRadius: '4px',
+            }
+          }}>
+            {messages.map(renderMessage)}
+            {isTyping && renderTypingIndicator()}
+            <div ref={messagesEndRef} />
+          </Box>
+
+          {/* Input Area */}
+          <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                placeholder="Type your response..."
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleUserResponse(userInput);
+                  }
+                }}
+                multiline
+                maxRows={3}
+                disabled={isTyping}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 3
+                  }
+                }}
               />
-              <Chip 
-                label="I'm ready!" 
-                onClick={() => handleQuickResponse("I'm ready!")}
-                clickable
-                size="small"
-              />
+              <IconButton 
+                color="primary" 
+                onClick={() => handleUserResponse(userInput)}
+                disabled={!userInput.trim() || isTyping}
+                sx={{
+                  bgcolor: 'primary.main',
+                  color: 'white',
+                  '&:hover': {
+                    bgcolor: 'primary.dark',
+                    transform: 'scale(1.1)'
+                  },
+                  '&:disabled': {
+                    bgcolor: 'action.disabled'
+                  }
+                }}
+              >
+                <Send />
+              </IconButton>
             </Box>
-          )}
-        </Box>
-      </DialogContent>
-    </Dialog>
+            
+            {/* Quick Response Suggestions */}
+            {currentStep === 'intro' && (
+              <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                <Chip 
+                  label="Yes, let's start!" 
+                  onClick={() => handleQuickResponse("Yes, let's start!")}
+                  clickable
+                  size="small"
+                  sx={{ borderRadius: 3 }}
+                />
+                <Chip 
+                  label="I'm ready!" 
+                  onClick={() => handleQuickResponse("I'm ready!")}
+                  clickable
+                  size="small"
+                  sx={{ borderRadius: 3 }}
+                />
+              </Box>
+            )}
+          </Box>
+        </DialogContent>
+      </Dialog>
+
+      {/* Success Snackbar */}
+      <Snackbar
+        open={showSuccessMessage}
+        autoHideDuration={3000}
+        onClose={() => setShowSuccessMessage(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={() => setShowSuccessMessage(false)} 
+          severity="success" 
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          Review created successfully! 🎉
+        </Alert>
+      </Snackbar>
+    </>
   );
 };
 

@@ -526,6 +526,7 @@ const MovieDetailsPage = () => {
           <WhereToWatch movie={movie} />
         </Box>
 
+        {/* AI Review Synthesis Section */}
         <Box sx={{ mb: 4 }}>
           <AIReviewSynthesis
             movieId={movie.id}
@@ -533,6 +534,7 @@ const MovieDetailsPage = () => {
           />
         </Box>
 
+        {/* Enhanced Movie Reviews Section with AI Bot - THIS IS THE KEY CHANGE */}
         <Box sx={{ mb: 4 }}>
           <MovieReviews movie={movie} />
         </Box>
