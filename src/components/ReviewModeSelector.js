@@ -272,12 +272,15 @@ const ReviewModeSelector = ({ open, onClose, movie }) => {
         onReviewCreated={handleReviewCreated}
       />
 
+      {/* If you haven't created AIReviewBot yet, comment this out for now */}
+      {
       <AIReviewBot
         open={botOpen}
         onClose={() => setBotOpen(false)}
         movie={movie}
         onReviewGenerated={handleReviewCreated}
       />
+      }
     </>
   );
 };

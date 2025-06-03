@@ -11,7 +11,8 @@ import {
   Collapse,
   Divider,
   Button,
-  alpha
+  alpha,
+  useTheme  // Add this import to fix theme error
 } from '@mui/material';
 import {
   Favorite,
@@ -20,7 +21,7 @@ import {
   ExpandMore,
   ExpandLess,
   PlayCircleOutline,
-  PlayArrow
+  RateReview
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { getImageUrl } from '../api/tmdbApi';
@@ -28,11 +29,13 @@ import { useMovieContext } from '../context/MovieContext';
 import { useRecommendation } from '../context/RecommendationContext';
 import RatingSystem from './RatingSystem';
 import StreamingIndicator from './StreamingIndicator';
-import { Edit, RateReview } from '@mui/icons-material';
 import SmartReviewComposer from './SmartReviewComposer';
+// Import ReviewModeSelector to fix the undefined error
+import ReviewModeSelector from './ReviewModeSelector';
 
 const MovieCard = ({ movie }) => {
   const navigate = useNavigate();
+  const theme = useTheme(); // Add this hook to fix theme error
   const { favorites, addToFavorites, removeFromFavorites } = useMovieContext();
   const { addToWatchHistory } = useRecommendation();
   const [expanded, setExpanded] = useState(false);
@@ -71,14 +74,14 @@ const MovieCard = ({ movie }) => {
     return new Date(dateString).getFullYear();
   };
 
-  // Analytics tracking for mode selection
+  // Analytics tracking for mode selection - Fixed gtag error
   const trackModeSelection = (mode, movieId) => {
     // Track which mode users prefer
     console.log(`User selected ${mode} mode for movie ${movieId}`);
 
-    // You can send this to analytics
-    if (typeof gtag !== 'undefined') {
-      gtag('event', 'review_mode_selected', {
+    // Safe gtag usage - check if it exists before using
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'review_mode_selected', {
         event_category: 'user_engagement',
         event_label: mode,
         custom_parameter_1: movieId
@@ -96,7 +99,7 @@ const MovieCard = ({ movie }) => {
         transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
         '&:hover': {
           transform: 'scale(1.03)',
-          boxShadow: theme => `0 8px 24px ${alpha(theme.palette.primary.main, 0.2)}`
+          boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.2)}`
         }
       }}
     >
@@ -183,11 +186,12 @@ const MovieCard = ({ movie }) => {
           </IconButton>
         </Tooltip>
 
+        {/* Write Review Button - Fixed to use ReviewModeSelector */}
         <Tooltip title="Write a review">
           <IconButton
             onClick={(e) => {
               e.stopPropagation();
-              setReviewDialogOpen(true);
+              setReviewModeOpen(true); // Changed to use mode selector
             }}
             aria-label="write review"
             sx={{
@@ -200,12 +204,6 @@ const MovieCard = ({ movie }) => {
             <RateReview />
           </IconButton>
         </Tooltip>
-
-        <ReviewModeSelector
-          open={reviewModeOpen}
-          onClose={() => setReviewModeOpen(false)}
-          movie={movie}
-        />
       </Box>
 
       {/* Expandable rating panel */}
@@ -231,13 +229,21 @@ const MovieCard = ({ movie }) => {
         </Box>
       </Collapse>
 
+      {/* Review Mode Selector - This gives users choice between Bot and Assistant */}
+      <ReviewModeSelector
+        open={reviewModeOpen}
+        onClose={() => setReviewModeOpen(false)}
+        movie={movie}
+      />
+
+      {/* Keep the original composer as backup/alternative */}
       <SmartReviewComposer
         open={reviewDialogOpen}
         onClose={() => setReviewDialogOpen(false)}
         movie={movie}
         onReviewCreated={(review) => {
           console.log('Review created:', review);
-          // Optional: Show success message or refresh reviews
+          trackModeSelection('structured', movie.id);
         }}
       />
     </Card>
