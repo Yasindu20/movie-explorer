@@ -1,23 +1,23 @@
 import React, { useState } from 'react';
-import { 
-  Card, 
-  CardActionArea, 
-  CardContent, 
-  CardMedia, 
-  Typography, 
-  Box, 
-  IconButton, 
-  Tooltip, 
+import {
+  Card,
+  CardActionArea,
+  CardContent,
+  CardMedia,
+  Typography,
+  Box,
+  IconButton,
+  Tooltip,
   Collapse,
   Divider,
   Button,
   alpha
 } from '@mui/material';
-import { 
-  Favorite, 
-  FavoriteBorder, 
-  Star, 
-  ExpandMore, 
+import {
+  Favorite,
+  FavoriteBorder,
+  Star,
+  ExpandMore,
   ExpandLess,
   PlayCircleOutline,
   PlayArrow
@@ -28,12 +28,16 @@ import { useMovieContext } from '../context/MovieContext';
 import { useRecommendation } from '../context/RecommendationContext';
 import RatingSystem from './RatingSystem';
 import StreamingIndicator from './StreamingIndicator';
+import { Edit, RateReview } from '@mui/icons-material';
+import SmartReviewComposer from './SmartReviewComposer';
 
 const MovieCard = ({ movie }) => {
   const navigate = useNavigate();
   const { favorites, addToFavorites, removeFromFavorites } = useMovieContext();
   const { addToWatchHistory } = useRecommendation();
   const [expanded, setExpanded] = useState(false);
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [reviewModeOpen, setReviewModeOpen] = useState(false);
 
   // Check if movie is in favorites
   const isFavorite = favorites.some(fav => fav.id === movie.id);
@@ -67,11 +71,26 @@ const MovieCard = ({ movie }) => {
     return new Date(dateString).getFullYear();
   };
 
+  // Analytics tracking for mode selection
+  const trackModeSelection = (mode, movieId) => {
+    // Track which mode users prefer
+    console.log(`User selected ${mode} mode for movie ${movieId}`);
+
+    // You can send this to analytics
+    if (typeof gtag !== 'undefined') {
+      gtag('event', 'review_mode_selected', {
+        event_category: 'user_engagement',
+        event_label: mode,
+        custom_parameter_1: movieId
+      });
+    }
+  };
+
   return (
-    <Card 
-      sx={{ 
-        height: '100%', 
-        display: 'flex', 
+    <Card
+      sx={{
+        height: '100%',
+        display: 'flex',
         flexDirection: 'column',
         position: 'relative',
         transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
@@ -88,15 +107,15 @@ const MovieCard = ({ movie }) => {
           image={getImageUrl(movie.poster_path)}
           alt={movie.title}
         />
-        
+
         {/* Rating badge */}
-        <Box 
-          sx={{ 
-            position: 'absolute', 
-            top: 10, 
-            right: 10, 
-            bgcolor: 'rgba(0,0,0,0.7)', 
-            color: 'gold', 
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 10,
+            right: 10,
+            bgcolor: 'rgba(0,0,0,0.7)',
+            color: 'gold',
             borderRadius: '50%',
             width: 45,
             height: 45,
@@ -112,7 +131,7 @@ const MovieCard = ({ movie }) => {
             <Star fontSize="small" sx={{ ml: 0.5 }} />
           </Box>
         </Box>
-        
+
         <CardContent sx={{ flexGrow: 1 }}>
           <Typography gutterBottom variant="h6" component="div" noWrap>
             {movie.title}
@@ -120,30 +139,30 @@ const MovieCard = ({ movie }) => {
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
             {formatReleaseDate(movie.release_date)}
           </Typography>
-          
+
           {/* Streaming Availability Indicator */}
           <Box sx={{ mt: 1 }}>
-            <StreamingIndicator 
-              movie={movie} 
-              variant="compact" 
+            <StreamingIndicator
+              movie={movie}
+              variant="compact"
               showQuickAccess={true}
             />
           </Box>
         </CardContent>
       </CardActionArea>
-      
+
       {/* Action bar */}
-      <Box sx={{ 
-        display: 'flex', 
-        alignItems: 'center', 
+      <Box sx={{
+        display: 'flex',
+        alignItems: 'center',
         justifyContent: 'space-between',
         px: 1,
         py: 0.5
       }}>
         {/* Favorite button */}
         <Tooltip title={isFavorite ? "Remove from favorites" : "Add to favorites"}>
-          <IconButton 
-            sx={{ 
+          <IconButton
+            sx={{
               color: isFavorite ? 'red' : 'gray'
             }}
             onClick={handleFavoriteToggle}
@@ -152,7 +171,7 @@ const MovieCard = ({ movie }) => {
             {isFavorite ? <Favorite /> : <FavoriteBorder />}
           </IconButton>
         </Tooltip>
-        
+
         {/* Rating system toggle */}
         <Tooltip title={expanded ? "Hide rating" : "Rate this movie"}>
           <IconButton
@@ -163,8 +182,32 @@ const MovieCard = ({ movie }) => {
             {expanded ? <ExpandLess /> : <ExpandMore />}
           </IconButton>
         </Tooltip>
+
+        <Tooltip title="Write a review">
+          <IconButton
+            onClick={(e) => {
+              e.stopPropagation();
+              setReviewDialogOpen(true);
+            }}
+            aria-label="write review"
+            sx={{
+              color: 'primary.main',
+              '&:hover': {
+                bgcolor: alpha(theme.palette.primary.main, 0.1)
+              }
+            }}
+          >
+            <RateReview />
+          </IconButton>
+        </Tooltip>
+
+        <ReviewModeSelector
+          open={reviewModeOpen}
+          onClose={() => setReviewModeOpen(false)}
+          movie={movie}
+        />
       </Box>
-      
+
       {/* Expandable rating panel */}
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <Divider />
@@ -173,7 +216,7 @@ const MovieCard = ({ movie }) => {
             Rate this movie:
           </Typography>
           <RatingSystem movieId={movie.id} />
-          
+
           <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
             <Button
               variant="outlined"
@@ -187,6 +230,16 @@ const MovieCard = ({ movie }) => {
           </Box>
         </Box>
       </Collapse>
+
+      <SmartReviewComposer
+        open={reviewDialogOpen}
+        onClose={() => setReviewDialogOpen(false)}
+        movie={movie}
+        onReviewCreated={(review) => {
+          console.log('Review created:', review);
+          // Optional: Show success message or refresh reviews
+        }}
+      />
     </Card>
   );
 };

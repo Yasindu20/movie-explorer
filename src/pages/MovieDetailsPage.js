@@ -35,6 +35,7 @@ import { useMovieContext } from '../context/MovieContext';
 import WhereToWatch from '../components/WhereToWatch';
 import YouTube from 'react-youtube';
 import AIReviewSynthesis from '../components/AIReviewSynthesis';
+import MovieReviews from '../components/MovieReviews';
 
 const MovieDetailsPage = () => {
   const { id } = useParams();
@@ -530,6 +531,10 @@ const MovieDetailsPage = () => {
             movieId={movie.id}
             movieTitle={movie.title}
           />
+        </Box>
+
+        <Box sx={{ mb: 4 }}>
+          <MovieReviews movie={movie} />
         </Box>
 
         <Grid container spacing={4}>
