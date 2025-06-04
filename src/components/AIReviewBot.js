@@ -3,7 +3,6 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   Button,
   Box,
   Typography,
@@ -27,10 +26,6 @@ import {
   Send,
   Close,
   AutoAwesome,
-  Movie,
-  ThumbUp,
-  ThumbDown,
-  Refresh,
   CheckCircle,
   Psychology
 } from '@mui/icons-material';

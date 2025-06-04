@@ -16,11 +16,8 @@ import {
 } from '@mui/material';
 import {
   Close,
-  Edit,
   SmartToy,
   Speed,
-  Psychology,
-  Chat,
   Assignment
 } from '@mui/icons-material';
 import SmartReviewComposer from './SmartReviewComposer';

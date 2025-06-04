@@ -26,9 +26,7 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Fab,
   useTheme,
-  alpha,
   Slide,
   Fade
 } from '@mui/material';
@@ -37,14 +35,9 @@ import {
   AutoAwesome,
   Psychology,
   Lightbulb,
-  Edit,
   Send,
-  Star,
   ExpandMore,
-  Add,
-  CheckCircle,
-  Movie,
-  Refresh
+  Movie
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
