@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -30,7 +30,6 @@ import {
   Psychology
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
 
 const AIReviewBot = ({ open, onClose, movie, onReviewGenerated }) => {
   const theme = useTheme();
@@ -61,59 +60,8 @@ const AIReviewBot = ({ open, onClose, movie, onReviewGenerated }) => {
     comparisons: []
   });
 
-  // Bot conversation flow
-  const conversationFlow = {
-    intro: {
-      next: 'initial_thoughts',
-      questions: ['greeting', 'movie_confirmation']
-    },
-    initial_thoughts: {
-      next: 'overall_rating',
-      questions: ['first_impression', 'overall_feeling']
-    },
-    overall_rating: {
-      next: 'detailed_aspects',
-      questions: ['rating_request', 'rating_reasoning']
-    },
-    detailed_aspects: {
-      next: 'specific_elements',
-      questions: ['plot_thoughts', 'acting_thoughts', 'visual_thoughts']
-    },
-    specific_elements: {
-      next: 'emotional_response',
-      questions: ['favorite_scene', 'least_favorite', 'memorable_moments']
-    },
-    emotional_response: {
-      next: 'recommendation',
-      questions: ['how_it_made_you_feel', 'target_audience']
-    },
-    recommendation: {
-      next: 'final_review',
-      questions: ['would_recommend', 'who_should_watch']
-    },
-    final_review: {
-      next: 'complete',
-      questions: ['review_generation', 'review_refinement']
-    }
-  };
-
   // Initialize bot conversation
-  useEffect(() => {
-    if (open && movie) {
-      initializeBot();
-    }
-  }, [open, movie]);
-
-  // Auto-scroll to bottom
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const initializeBot = () => {
+  const initializeBot = useCallback(() => {
     setMessages([]);
     setCurrentStep('intro');
     setShowSuccessMessage(false);
@@ -136,6 +84,21 @@ const AIReviewBot = ({ open, onClose, movie, onReviewGenerated }) => {
     setTimeout(() => {
       addBotMessage(getBotGreeting());
     }, 500);
+  }, [movie, user?.name, botPersonality]);
+
+  useEffect(() => {
+    if (open && movie) {
+      initializeBot();
+    }
+  }, [open, movie, initializeBot]);
+
+  // Auto-scroll to bottom
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const getBotGreeting = () => {
@@ -370,6 +333,9 @@ const AIReviewBot = ({ open, onClose, movie, onReviewGenerated }) => {
         break;
       case 'recommendation':
         setReviewData(prev => ({ ...prev, recommend: input }));
+        break;
+      default:
+        // No action needed for other steps
         break;
     }
   };
