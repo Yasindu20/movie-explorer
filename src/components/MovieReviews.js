@@ -8,7 +8,9 @@ import {
   CardContent,
   Avatar,
   useTheme,
-  Grid
+  Grid,
+  CircularProgress,
+  Skeleton
 } from '@mui/material';
 import {
   Add,
@@ -26,20 +28,63 @@ const MovieReviews = ({ movie }) => {
   const theme = useTheme();
   const [reviewModeOpen, setReviewModeOpen] = useState(false);
   const [aiBotOpen, setAiBotOpen] = useState(false);
-  const [reviews, setReviews] = useState([]); // This would come from your API
-  const [loading, setLoading] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true); // Used for initial reviews loading
+  const [submitting, setSubmitting] = useState(false); // Used for review submission
 
-  // Mock data - replace with actual API call
+  // Fetch reviews when component mounts
   useEffect(() => {
-    // Fetch reviews for this movie
-    // setReviews(fetchedReviews);
+    const fetchReviews = async () => {
+      setLoading(true);
+      try {
+        // Replace with actual API call
+        // const response = await api.getMovieReviews(movie.id);
+        // setReviews(response.data);
+        
+        // Mock API delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        setReviews([]); // Replace with actual reviews
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReviews();
   }, [movie.id]);
 
-  const handleReviewCreated = (newReview) => {
+  const handleReviewCreated = async (newReview) => {
     console.log('New review created:', newReview);
-    // Add the new review to the reviews list
-    setReviews(prev => [newReview, ...prev]);
+    setSubmitting(true);
+    
+    try {
+      // Mock API call for submitting review
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Add the new review to the reviews list
+      setReviews(prev => [newReview, ...prev]);
+    } catch (error) {
+      console.error('Error submitting review:', error);
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  // Loading skeleton for reviews
+  const ReviewsSkeleton = () => (
+    <Box>
+      {[1, 2, 3].map((index) => (
+        <Card key={index} sx={{ mb: 2 }}>
+          <CardContent>
+            <Skeleton variant="text" width="60%" height={32} />
+            <Skeleton variant="text" width="100%" />
+            <Skeleton variant="text" width="80%" />
+          </CardContent>
+        </Card>
+      ))}
+    </Box>
+  );
 
   return (
     <Box>
@@ -59,16 +104,19 @@ const MovieReviews = ({ movie }) => {
           
           <Button
             variant="contained"
-            startIcon={<Add />}
+            startIcon={submitting ? <CircularProgress size={16} color="inherit" /> : <Add />}
             onClick={() => setReviewModeOpen(true)}
+            disabled={submitting}
             sx={{ borderRadius: 2 }}
           >
-            Write Review
+            {submitting ? 'Submitting...' : 'Write Review'}
           </Button>
         </Box>
 
-        {/* Reviews List or Placeholder */}
-        {reviews.length > 0 ? (
+        {/* Reviews List, Loading State, or Placeholder */}
+        {loading ? (
+          <ReviewsSkeleton />
+        ) : reviews.length > 0 ? (
           <Box>
             {/* Display actual reviews here */}
             {reviews.map((review, index) => (
@@ -93,11 +141,12 @@ const MovieReviews = ({ movie }) => {
             <Button
               variant="contained"
               size="large"
-              startIcon={<Add />}
+              startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : <Add />}
               onClick={() => setReviewModeOpen(true)}
+              disabled={submitting}
               sx={{ borderRadius: 3 }}
             >
-              Write the First Review
+              {submitting ? 'Submitting Review...' : 'Write the First Review'}
             </Button>
           </Box>
         )}

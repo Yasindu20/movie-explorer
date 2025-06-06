@@ -3,7 +3,6 @@ import {
   Box,
   Paper,
   Typography,
-  Grid,
   Button,
   Chip,
   CircularProgress,
@@ -15,7 +14,6 @@ import {
   Avatar,
   Card,
   CardContent,
-  CardActions,
   Collapse,
   useTheme,
   useMediaQuery,
@@ -23,7 +21,6 @@ import {
 } from '@mui/material';
 import {
   PlayArrow,
-  OpenInNew,
   Refresh,
   ExpandMore,
   ExpandLess,

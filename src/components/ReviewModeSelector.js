@@ -25,7 +25,7 @@ import AIReviewBot from './AIReviewBot';
 
 const ReviewModeSelector = ({ open, onClose, movie }) => {
   const theme = useTheme();
-  const [selectedMode, setSelectedMode] = useState(null);
+  // Removed unused selectedMode state
   const [composerOpen, setComposerOpen] = useState(false);
   const [botOpen, setBotOpen] = useState(false);
 
@@ -269,15 +269,12 @@ const ReviewModeSelector = ({ open, onClose, movie }) => {
         onReviewCreated={handleReviewCreated}
       />
 
-      {/* If you haven't created AIReviewBot yet, comment this out for now */}
-      {
       <AIReviewBot
         open={botOpen}
         onClose={() => setBotOpen(false)}
         movie={movie}
         onReviewGenerated={handleReviewCreated}
       />
-      }
     </>
   );
 };
