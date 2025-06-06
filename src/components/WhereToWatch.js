@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Box,
   Paper,
@@ -44,12 +44,12 @@ const WhereToWatch = ({ movie, compact = false }) => {
   const [expanded, setExpanded] = useState(!compact);
 
   // Tab configuration
-  const tabs = [
+  const tabs = useMemo(() => [
     { label: 'Subscription', icon: <Subscriptions />, key: 'subscription' },
     { label: 'Rent', icon: <Movie />, key: 'rent' },
     { label: 'Buy', icon: <ShoppingCart />, key: 'buy' },
     { label: 'Free', icon: <FreeBreakfast />, key: 'free' }
-  ];
+  ], []);
 
   const fetchStreamingData = useCallback(async () => {
     if (!movie) return;
