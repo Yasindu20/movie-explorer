@@ -62,6 +62,15 @@ const AIReviewBot = ({ open, onClose, movie, onReviewGenerated }) => {
 
   // Initialize bot conversation
   const initializeBot = useCallback(() => {
+    const getBotGreeting = () => {
+      const greetings = {
+        friendly: `Hey ${user?.name || 'there'}! 👋 I'm Rex, your movie review buddy! I'm here to help you create an awesome review for "${movie.title}". Ready to dive in?`,
+        professional: `Hello ${user?.name || 'User'}. I'm your AI Review Assistant. I'll guide you through creating a comprehensive review for "${movie.title}". Shall we begin?`,
+        casual: `Yo! 🎬 Ready to talk about "${movie.title}"? I'm your AI movie buddy and I'm pumped to help you write something epic!`
+      };
+      return greetings[botPersonality];
+    };
+
     setMessages([]);
     setCurrentStep('intro');
     setShowSuccessMessage(false);
@@ -99,15 +108,6 @@ const AIReviewBot = ({ open, onClose, movie, onReviewGenerated }) => {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const getBotGreeting = () => {
-    const greetings = {
-      friendly: `Hey ${user?.name || 'there'}! 👋 I'm Rex, your movie review buddy! I'm here to help you create an awesome review for "${movie.title}". Ready to dive in?`,
-      professional: `Hello ${user?.name || 'User'}. I'm your AI Review Assistant. I'll guide you through creating a comprehensive review for "${movie.title}". Shall we begin?`,
-      casual: `Yo! 🎬 Ready to talk about "${movie.title}"? I'm your AI movie buddy and I'm pumped to help you write something epic!`
-    };
-    return greetings[botPersonality];
   };
 
   const addBotMessage = (text, options = {}) => {

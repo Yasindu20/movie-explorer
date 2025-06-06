@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Paper,
@@ -51,13 +51,7 @@ const WhereToWatch = ({ movie, compact = false }) => {
     { label: 'Free', icon: <FreeBreakfast />, key: 'free' }
   ];
 
-  useEffect(() => {
-    if (movie) {
-      fetchStreamingData();
-    }
-  }, [movie]);
-
-  const fetchStreamingData = async () => {
+  const fetchStreamingData = useCallback(async () => {
     if (!movie) return;
     
     setLoading(true);
@@ -87,7 +81,13 @@ const WhereToWatch = ({ movie, compact = false }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [movie, tabs]);
+
+  useEffect(() => {
+    if (movie) {
+      fetchStreamingData();
+    }
+  }, [movie, fetchStreamingData]);
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
