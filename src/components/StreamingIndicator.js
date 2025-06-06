@@ -31,30 +31,30 @@ const StreamingIndicator = ({ movie, variant = 'compact', showQuickAccess = fals
   const open = Boolean(anchorEl);
 
   useEffect(() => {
+    const fetchStreamingData = async () => {
+      if (!movie) return;
+      
+      try {
+        const result = await streamingApi.getMovieStreaming(
+          movie.id,
+          movie.imdb_id,
+          movie.title
+        );
+        
+        const formattedData = formatStreamingData(result);
+        setStreamingData(formattedData);
+      } catch (err) {
+        console.error('Failed to fetch streaming data for indicator:', err);
+        setStreamingData({ isEmpty: true });
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (movie) {
       fetchStreamingData();
     }
   }, [movie]);
-
-  const fetchStreamingData = async () => {
-    if (!movie) return;
-    
-    try {
-      const result = await streamingApi.getMovieStreaming(
-        movie.id,
-        movie.imdb_id,
-        movie.title
-      );
-      
-      const formattedData = formatStreamingData(result);
-      setStreamingData(formattedData);
-    } catch (err) {
-      console.error('Failed to fetch streaming data for indicator:', err);
-      setStreamingData({ isEmpty: true });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleQuickAccessClick = (event) => {
     setAnchorEl(event.currentTarget);

@@ -26,9 +26,7 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Fab,
   useTheme,
-  alpha,
   Slide,
   Fade
 } from '@mui/material';
@@ -37,21 +35,17 @@ import {
   AutoAwesome,
   Psychology,
   Lightbulb,
-  Edit,
   Send,
-  Star,
   ExpandMore,
-  Add,
-  CheckCircle,
-  Movie,
-  Refresh
+  Movie
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 
 const SmartReviewComposer = ({ open, onClose, movie, onReviewCreated }) => {
   const theme = useTheme();
-  const { user } = useAuth();
+  // Removed unused variable: const { user } = useAuth();
+  const { currentUser } = useAuth(); // If you need the user, use this instead
   
   // Stepper state
   const [activeStep, setActiveStep] = useState(0);
@@ -87,7 +81,7 @@ const SmartReviewComposer = ({ open, onClose, movie, onReviewCreated }) => {
   // UI state
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [currentSection, setCurrentSection] = useState(0);
+  // Removed unused state: const [currentSection, setCurrentSection] = useState(0);
 
   // Load AI templates on mount
   useEffect(() => {
@@ -234,7 +228,8 @@ const SmartReviewComposer = ({ open, onClose, movie, onReviewCreated }) => {
       const response = await axios.post('/api/user-reviews', {
         ...reviewData,
         movieId: movie.id,
-        aiAssisted
+        aiAssisted,
+        userId: currentUser?.id // Use the currentUser if needed
       });
 
       onReviewCreated?.(response.data.data);

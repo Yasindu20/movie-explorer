@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Paper,
@@ -9,7 +9,6 @@ import {
   Grid,
   LinearProgress,
   Card,
-  CardContent,
   Button,
   Divider,
   Accordion,
@@ -41,13 +40,7 @@ const AIReviewSynthesis = ({ movieId, movieTitle }) => {
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    if (movieId) {
-      fetchSynthesis();
-    }
-  }, [movieId]);
-
-  const fetchSynthesis = async (force = false) => {
+  const fetchSynthesis = useCallback(async (force = false) => {
     try {
       setLoading(!force);
       setRefreshing(force);
@@ -65,7 +58,13 @@ const AIReviewSynthesis = ({ movieId, movieTitle }) => {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [movieId]);
+
+  useEffect(() => {
+    if (movieId) {
+      fetchSynthesis();
+    }
+  }, [movieId, fetchSynthesis]);
 
   const handleRefresh = () => {
     fetchSynthesis(true);
